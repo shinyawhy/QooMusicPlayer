@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file alias="close">icon/colse.png</file>
+        <file alias="max">icon/maximize.png</file>
+        <file alias="menu">icon/menu.png</file>
+        <file alias="normal">icon/minimize.png</file>
+        <file alias="logo">icon/logo.png</file>
+        <file alias="search">icon/search.png</file>
+        <file alias="pause">icon/pause.png</file>
+        <file alias="play">icon/play.png</file>
+        <file alias="back">icon/skip-back.png</file>
+        <file alias="forward">icon/skip-forward.png</file>
+        <file alias="like">icon/like.png</file>
+        <file alias="list_circle">icon/list_circle.png</file>
+        <file alias="local">icon/local.png</file>
+        <file alias="lyric">icon/lryic.png</file>
+        <file alias="random">icon/random.png</file>
+        <file alias="recommond">icon/recommond.png</file>
+        <file alias="single_circle">icon/single_circle.png</file>
+        <file alias="songs">icon/songs.png</file>
+        <file alias="sound">icon/sound.png</file>
+        <file alias="songslist">icon/songslist.png</file>
+        <file alias="handle">icon/handle.png</file>
+        <file alias="min">icon/min.png</file>
+    </qresource>
+</RCC>

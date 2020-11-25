@@ -1,0 +1,20 @@
+#ifndef MUSICLISTWIDGET_H
+#define MUSICLISTWIDGET_H
+#include <QList>
+#include <QMediaPlaylist>
+#include <QListWidget>
+#include "music.h"
+
+class MusicListWidget
+{
+    // 歌单列表
+class MusicList{
+    
+    QString name;   // 歌单名
+    QList<Music *> music;   // 所含歌曲
+};
+public:
+    MusicListWidget();
+};
+
+#endif // MUSICLISTWIDGET_H
