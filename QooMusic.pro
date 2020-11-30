@@ -24,7 +24,7 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    music.h \
+    musicbeans.h \
     musiclist.h
 
 FORMS += \

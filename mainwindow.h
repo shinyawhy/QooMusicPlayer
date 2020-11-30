@@ -10,6 +10,25 @@
 #include <QMediaPlaylist>
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
+#include <QTimer>
+#include <QSettings>
+#include <QDebug>
+#include <QClipboard>
+#include <QNetworkCookie>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QTextCodec>
+#include <stdio.h>
+#include <iostream>
+#include <QtWebSockets/QWebSocket>
+#include <QAuthenticator>
+#include <QtConcurrent/QtConcurrent>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QStyledItemDelegate>
+#include <QListView>
+#include <QStringListModel>
+#include <QScrollBar>
 #include "musiclist.h"
 
 QT_BEGIN_NAMESPACE
@@ -22,7 +41,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
 private slots:
     void on_close_button_clicked();
@@ -46,6 +65,9 @@ private:
     void initMusicList();       // 初始化歌单
     void initMenuAction();      // 初始化右键菜单
     void initSystemTrayIcon();  // 初始化系统托盘
+    
+    void isSongDownloaded(Music music);
+    void downloadSong(Music music);
 
 
 private:
@@ -54,6 +76,8 @@ private:
     QMediaPlaylist *playlist;        // 播放列表
     QSystemTrayIcon *mySystemTray;   // 系统托盘
     QList<MusicList *> musicList;    // 歌单
+    
+    const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
 };
 #endif // MAINWINDOW_H

@@ -1,6 +1,2 @@
-#include "music.h"
+#include "musicbeans.h"
 
-Music::Music()
-{
-
-}

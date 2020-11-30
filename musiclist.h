@@ -3,7 +3,7 @@
 #include <QList>
 #include <QMediaPlaylist>
 #include <QListWidget>
-#include "music.h"
+#include "musicbeans.h"
 
 class MusicListWidget;
 

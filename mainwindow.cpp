@@ -67,7 +67,17 @@ void MainWindow::initMenuAction()
 
 void MainWindow::initSystemTrayIcon()
 {
+    
+}
 
+void MainWindow::isSongDownloaded(Music music)
+{
+    
+}
+
+void MainWindow::downloadSong(Music music)
+{
+//    QString url = API_DOMAIN + "/"
 }
 
 
