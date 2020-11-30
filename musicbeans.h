@@ -141,7 +141,7 @@ struct PlayList
   PlayListCreator creator;
 };
 
-typedef QList<Music> MusicList;
+typedef QList<Music> SongList;
 typedef QList<PlayList> PlayListList;
 
 #endif // MUSIC_H
