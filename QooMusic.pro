@@ -23,6 +23,7 @@ SOURCES += \
     musiclist.cpp
 
 HEADERS += \
+    LyricStreamWidget.h \
     mainwindow.h \
     musicbeans.h \
     musiclist.h

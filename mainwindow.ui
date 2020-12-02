@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>酷云播放器</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="icon.qrc">
+    <normaloff>:/icon/logo</normaloff>:/icon/logo</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -344,8 +348,69 @@ border:none;
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
-        <widget class="QWidget" name="page"/>
-        <widget class="QWidget" name="page_2"/>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="searchResultPage">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QTableWidget" name="searchResultTable">
+            <property name="styleSheet">
+             <string notr="true">QTableWidget
+{
+	background: transparent;
+	border: none;
+	alternate-background-color: rgba(132, 136, 139, 20);
+}
+
+QHeaderView::section
+{
+	background-color: transparent;
+}
+
+QTableCornerButton::section
+{
+	background:transparent;
+}</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="lyricsPage">
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="styleSheet">
+             <string notr="true">QScrollArea
+{
+	background: transparent;
+	border: none;
+}</string>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="LyricStreamWidget" name="lyricWidget">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>555</width>
+               <height>465</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">#lyricWidget
+{
+	background: transparent;
+}</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -550,6 +615,14 @@ background-color:transparent;
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LyricStreamWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">lyricstreamwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="icon.qrc"/>
  </resources>

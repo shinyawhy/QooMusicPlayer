@@ -29,6 +29,7 @@
 #include <QListView>
 #include <QStringListModel>
 #include <QScrollBar>
+#include <QHeaderView>
 #include "musiclist.h"
 
 QT_BEGIN_NAMESPACE
@@ -52,6 +53,10 @@ private slots:
 
     void on_normal_button_clicked();
 
+    void on_search_button_clicked();
+
+    void on_search_edit_returnPressed();
+
 private:
     Ui::MainWindow *ui;
 
@@ -69,6 +74,10 @@ private:
     void isSongDownloaded(Music music);
     void downloadSong(Music music);
 
+    void searchMusic(QString key);                      // 搜索音乐
+    void setSearchResultTable(SongList songs);          // 搜索结果数据到table
+    void setSearchResultTable(PlayListList playLists);
+
 
 private:
 
@@ -76,6 +85,11 @@ private:
     QMediaPlaylist *playlist;        // 播放列表
     QSystemTrayIcon *mySystemTray;   // 系统托盘
     QList<MusicList *> musicList;    // 歌单
+
+    SongList searchResultSongs;
+    PlayListList searchResultPlayLists;
+
+    QString msecondToString(qint64 msecond);
     
     const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
