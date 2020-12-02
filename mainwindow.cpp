@@ -290,6 +290,16 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     isMousePressed = false;
 }
 
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if(mousePosition.y() <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
+    {
+        if(windowState() == Qt::WindowMaximized)
+        on_normal_button_clicked();
+        else
+        on_max_button_clicked();
+    }
+}
 
 void MainWindow::on_close_button_clicked()
 {
