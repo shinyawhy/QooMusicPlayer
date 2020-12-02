@@ -266,6 +266,30 @@ QString MainWindow::msecondToString(qint64 msecond)
             .arg(msecond / 1000 % 60, 2, 10, QLatin1Char('0'));
 }
 
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if (isMousePressed == true)
+    {
+        QPoint movePot = event->globalPos() - mousePosition;
+        move(movePot);
+    }
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    mousePosition = event->pos();
+    // 只对标题栏范围内的鼠标事件进行处理
+    if(mousePosition.y() <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
+    {
+        isMousePressed = true;
+    }
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    isMousePressed = false;
+}
+
 
 void MainWindow::on_close_button_clicked()
 {

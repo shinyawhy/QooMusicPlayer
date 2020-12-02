@@ -93,5 +93,18 @@ private:
     
     const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
+protected:
+    // 重新实现拖动操作
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+
+    QPoint mousePosition;
+    bool isMousePressed;
+
+    const static int pos_min_x = 0;
+    const static int pos_min_y = 0;
+
+
 };
 #endif // MAINWINDOW_H
