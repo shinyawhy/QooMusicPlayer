@@ -300,6 +300,61 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
         on_max_button_clicked();
     }
 }
+/**
+ * 重写窗体缩放， 仅在Windows环境下有效
+ */
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+    Q_UNUSED(eventType);
+
+    MSG *param = static_cast<MSG *>(message);
+
+    switch (param->message) {
+    case WM_NCHITTEST:
+    {
+       int nX = GET_X_LPARAM(param->lParam) - this->geometry().x();
+       int nY = GET_Y_LPARAM(param->lParam) - this->geometry().y();
+       // 鼠标位于子控件上， 不进行处理
+       if (childAt(nX, nY) != NULL && childAt(nX, nY) != ui->centralwidget)
+       {
+           return QWidget::nativeEvent(eventType, message, result);
+       }
+       *result = HTCAPTION;
+
+       // 鼠标位于窗体边框， 进行缩放
+       if ((nX > 0) && (nX < 5))
+           *result = HTLEFT;
+
+       if ((nX > this->width() - 5) && (nX < this->width()))
+           *result = HTRIGHT;
+
+       if ((nY > 0) && (nY < 5))
+           *result = HTTOP;
+
+       if ((nY > this->height() - 5) && (nY < this->height()))
+           *result = HTBOTTOM;
+
+       if ((nX > 0) && (nX < 5) && (nY > 0)
+               && (nY < 5))
+           *result = HTTOPLEFT;
+
+       if ((nX > this->width() - 5) && (nX < this->width())
+               && (nY > 0) && (nY < 5))
+           *result = HTTOPRIGHT;
+
+       if ((nX > 0) && (nX < 5)
+               && (nY > this->height() - 5) && (nY < this->height()))
+           *result = HTBOTTOMLEFT;
+
+       if ((nX > this->width() - 5) && (nX < this->width())
+               && (nY > this->height() - 5) && (nY < this->height()))
+           *result = HTBOTTOMRIGHT;
+
+       return true;
+    }
+    }
+    return QWidget::nativeEvent(eventType, message, result);
+}
 
 void MainWindow::on_close_button_clicked()
 {

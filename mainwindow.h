@@ -32,6 +32,11 @@
 #include <QHeaderView>
 #include "musiclist.h"
 
+#ifdef Q_OS_WIN
+#include <qt_windows.h>
+#include <Windowsx.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -100,6 +105,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
+    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 
     QPoint mousePosition;
     bool isMousePressed;
