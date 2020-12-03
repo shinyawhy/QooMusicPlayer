@@ -76,12 +76,37 @@ private:
     void initMenuAction();      // 初始化右键菜单
     void initSystemTrayIcon();  // 初始化系统托盘
     
-    void isSongDownloaded(Music music);
-    void downloadSong(Music music);
+    QString songPath(const Music &music) const;
+    QString lyricPath(const Music &music) const;
+    QString coverPath(const Music &music) const;
+    bool isSongDownloaded(Music music);
 
     void searchMusic(QString key);                      // 搜索音乐
     void setSearchResultTable(SongList songs);          // 搜索结果数据到table
     void setSearchResultTable(PlayListList playLists);
+
+    // 下载音乐
+    void playLocalSong(Music music);
+    void addDownloadSong(Music music);
+    void downloadNext();
+    void downloadSong(Music music);
+    void downloadSongLyric(Music music);
+    void downloadSongCover(Music music);
+
+    // 播放音乐
+    void startPlaySong(Music music);
+    void playNext();
+    void appendOrderSongs(SongList musics);
+    void appendNextSongs(SongList musics);
+
+    void setCurrentCover(const QPixmap& pixmap);
+    void setCurrentLyric(QString lyric);
+
+    // 保存配置
+    void saveSongList(QString key, const SongList &songs);
+    // 读取配置
+    void restoreSongList(QString key, SongList &songs);
+
 
 
 private:
@@ -93,9 +118,21 @@ private:
 
     SongList searchResultSongs;
     PlayListList searchResultPlayLists;
+    Music downloadingSong;
+    Music playAfterDownloaded;
+    Music playingSong;
+
+    SongList orderSongs;             // 播放列表
+    SongList favoriteSongs;          // 我的喜欢
+    SongList toDownLoadSongs;        // 即将下载
+
+    QPixmap currentCover;
+
 
     QString msecondToString(qint64 msecond);
     
+    QSettings settings;
+    QDir musicFileDir;
     const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
 protected:
@@ -114,5 +151,10 @@ protected:
     const static int pos_min_y = 0;
 
 
+signals:
+    void signalOrderSongPlayed(Music music);
+    void signalSongDownLoadFinished(Music music);
+    void signalLyricDownloadFinished(Music music);
+    void signalCoverDownloadFinished(Music music);
 };
 #endif // MAINWINDOW_H

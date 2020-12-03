@@ -3,7 +3,9 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+    settings(QApplication::applicationDirPath() + "/musics.ini", QSettings::Format::IniFormat),
+    musicFileDir(QApplication::applicationDirPath() + "/musics")
 {
     ui->setupUi(this);
 
@@ -109,6 +111,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->scrollArea->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->searchResultTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->searchResultTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
+
+    musicFileDir.mkpath(musicFileDir.absolutePath());
 }
 
 MainWindow::~MainWindow()
@@ -156,14 +160,321 @@ void MainWindow::initSystemTrayIcon()
     
 }
 
-void MainWindow::isSongDownloaded(Music music)
+QString MainWindow::songPath(const Music &music) const
 {
-    
+    return musicFileDir.absoluteFilePath(snum(music.id) + ".mp3");
+}
+
+QString MainWindow::lyricPath(const Music &music) const
+{
+    return musicFileDir.absoluteFilePath(snum(music.id) + ".lrc");
+}
+
+QString MainWindow::coverPath(const Music &music) const
+{
+    return musicFileDir.absoluteFilePath(snum(music.id) + ".jpg");
+}
+
+/**
+ * 歌曲是否已下载
+ */
+bool MainWindow::isSongDownloaded(Music music)
+{
+    return QFileInfo(songPath(music)).exists();
 }
 
 void MainWindow::downloadSong(Music music)
 {
-    //    QString url = API_DOMAIN + "/"
+    if (isSongDownloaded(music))
+        return;
+    downloadingSong = music;
+    QString url = API_DOMAIN +"/song/url?id=" + snum(music.id);
+    qDebug()<< "获取歌曲信息：" << music.simpleString();
+    QNetworkAccessManager* manager = new QNetworkAccessManager;
+    QNetworkRequest* request = new QNetworkRequest(url);
+    request->setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+    request->setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36");
+    connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply* reply)
+    {
+        QByteArray baData = reply->readAll();
+        QJsonParseError error;
+        QJsonDocument document = QJsonDocument::fromJson(baData, &error);
+        if (error.error != QJsonParseError::NoError)
+        {
+            qDebug() << error.errorString();
+            return ;
+        }
+        QJsonObject json = document.object();
+        if (json.value("code").toInt() != 200)
+        {
+            qDebug() << ("返回结果不为200：") << json.value("message").toString();
+            return ;
+        }
+        QJsonArray array = json.value("data").toArray();
+        if (!array.size())
+        {
+            qDebug() << "未找到歌曲：" << music.simpleString();
+            downloadingSong = Music();  // 清空
+            downloadNext();
+            return ;
+        }
+
+        json = array.first().toObject();
+        QString url = JVAL_STR(url);
+        int br = JVAL_INT(br); // 比率320000
+        int size = JVAL_INT(size);
+        QString type = JVAL_STR(type); // mp3
+        QString encodeType = JVAL_STR(encodeType); // mp3
+        qDebug() << "  信息：" << br << size << type << encodeType << url;
+        if (size == 0)
+        {
+            qDebug() << "下载失败， 可能没有版权" << music.simpleString();
+            if (playAfterDownloaded == music)
+            {
+                if (orderSongs.contains(music))
+                {
+                    orderSongs.removeOne(music);
+                }
+                playNext();
+            }
+
+            downloadingSong = Music();
+            downloadNext();
+            return ;
+        }
+
+        // 下载歌曲本身
+        QNetworkAccessManager manager;
+        QEventLoop loop;
+        QNetworkReply *reply1 = manager.get(QNetworkRequest(QUrl(url)));
+        // 请求结束并完成下载后退出子事件循环
+        connect(reply1, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+        // 开启子事件循环
+        loop.exec();
+        QByteArray baData1 = reply1->readAll();
+
+        QFile file(songPath(music));
+        file.open(QIODevice::WriteOnly);
+        file.write(baData1);
+        file.flush();
+        file.close();
+
+        emit signalSongDownLoadFinished(music);
+
+        if (playAfterDownloaded == music)
+            playLocalSong(music);
+
+        downloadingSong = Music();
+        downloadNext();
+    });
+    manager->get(*request);
+
+    downloadSongLyric(music);
+    downloadSongCover(music);
+}
+
+void MainWindow::downloadSongLyric(Music music)
+{
+    if (QFileInfo(lyricPath(music)).exists())
+        return ;
+
+    downloadingSong = music;
+    QString url = API_DOMAIN + "/lyric?id=" + snum(music.id);
+    QNetworkAccessManager* manager = new QNetworkAccessManager;
+    QNetworkRequest* request = new QNetworkRequest(url);
+    request->setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+    request->setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36");
+    connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply* reply){
+        QByteArray baData = reply->readAll();
+        QJsonParseError error;
+        QJsonDocument document = QJsonDocument::fromJson(baData, &error);
+        if (error.error != QJsonParseError::NoError)
+        {
+            qDebug() << error.errorString();
+            return ;
+        }
+        QJsonObject json = document.object();
+        if (json.value("code").toInt() != 200)
+        {
+            qDebug() << ("返回结果不为200：") << json.value("message").toString();
+            return ;
+        }
+
+        QString lrc = json.value("lrc").toObject().value("lyric").toString();
+        if (!lrc.isEmpty())
+        {
+            QFile file(lyricPath(music));
+            file.open(QIODevice::WriteOnly);
+            QTextStream stream(&file);
+            stream << lrc;
+            file.flush();
+            file.close();
+
+            qDebug() << "下载歌词完成：" << music.simpleString();
+            if (playAfterDownloaded == music || playingSong == music)
+            {
+                setCurrentLyric(lrc);
+            }
+
+            emit signalLyricDownloadFinished(music);
+        }
+        else
+        {
+            qDebug() << "warning: 下载的歌词是空的" << music.simpleString();
+        }
+    });
+    manager->get(*request);
+}
+
+void MainWindow::downloadSongCover(Music music)
+{
+    if (QFileInfo(coverPath(music)).exists())
+        return ;
+    downloadingSong = music;
+    QString url = API_DOMAIN + "/song/detail?ids=" + snum(music.id);
+    QNetworkAccessManager* manager = new QNetworkAccessManager;
+    QNetworkRequest* request = new QNetworkRequest(url);
+    request->setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+    request->setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36");
+    connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply* reply){
+        QByteArray baData = reply->readAll();
+        QJsonParseError error;
+        QJsonDocument document = QJsonDocument::fromJson(baData, &error);
+        if (error.error != QJsonParseError::NoError)
+        {
+            qDebug() << error.errorString();
+            return ;
+        }
+        QJsonObject json = document.object();
+        if (json.value("code").toInt() != 200)
+        {
+            qDebug() << ("返回结果不为200：") << json.value("message").toString();
+            return ;
+        }
+
+        QJsonArray array = json.value("songs").toArray();
+        if (!array.size())
+        {
+            qDebug() << "未找到歌曲：" << music.simpleString();
+            downloadingSong = Music();
+            downloadNext();
+            return ;
+        }
+
+        json = array.first().toObject();
+        QString url = json.value("al").toObject().value("picUrl").toString();
+        qDebug() << "封面地址：" << url;
+
+        // 开始下载歌曲本身
+        QNetworkAccessManager manager;
+        QEventLoop loop;
+        QNetworkReply *reply1 = manager.get(QNetworkRequest(QUrl(url)));
+        //请求结束并下载完成后，退出子事件循环
+        connect(reply1, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        //开启子事件循环
+        loop.exec();
+        QByteArray baData1 = reply1->readAll();
+        QPixmap pixmap;
+        pixmap.loadFromData(baData1);
+        if (!pixmap.isNull())
+        {
+            QFile file(coverPath(music));
+            file.open(QIODevice::WriteOnly);
+            file.write(baData1);
+            file.flush();
+            file.close();
+
+            emit signalCoverDownloadFinished(music);
+
+            // 正是当前要播放的歌曲
+            if (playAfterDownloaded == music || playingSong == music)
+            {
+                pixmap = pixmap.scaledToHeight(ui->playingCoverLable->height());
+                ui->playingCoverLable->setPixmap(pixmap);
+                setCurrentCover(pixmap);
+            }
+        }
+        else
+        {
+            qDebug() << "warning: 下载的封面是空的" << music.simpleString();
+        }
+    });
+    manager->get(*request);
+}
+
+/**
+ * 立即播放
+ */
+void MainWindow::startPlaySong(Music music)
+{
+    if (isSongDownloaded(music))
+    {
+        playLocalSong(music);
+    }
+    else
+    {
+        playAfterDownloaded = music;
+        downloadSong(music);
+    }
+}
+
+void MainWindow::playNext()
+{
+    // 播放列表结束 随机播放我的喜欢里的歌
+    if (!orderSongs.size())
+    {
+        if(!favoriteSongs.size())
+            return ;
+
+        int r = qrand() % favoriteSongs.size();
+        startPlaySong(favoriteSongs.at(r));
+        return ;
+    }
+
+    Music music = orderSongs.takeFirst();
+    saveSongList("music/order", orderSongs);
+    // TODO setSongModelToView
+
+    startPlaySong(music);
+    emit signalOrderSongPlayed(music);
+
+}
+
+void MainWindow::appendOrderSongs(SongList musics)
+{
+
+}
+
+void MainWindow::appendNextSongs(SongList musics)
+{
+
+}
+
+void MainWindow::setCurrentCover(const QPixmap &pixmap)
+{
+    currentCover = pixmap;
+}
+
+void MainWindow::setCurrentLyric(QString lyric)
+{
+
+}
+
+void MainWindow::saveSongList(QString key, const SongList &songs)
+{
+    QJsonArray array;
+    foreach(Music music, songs)
+        array.append(music.toJson());
+    settings.setValue(key,array);
+
+}
+
+void MainWindow::restoreSongList(QString key, SongList &songs)
+{
+    QJsonArray array = settings.value(key).toJsonArray();
+    foreach(QJsonValue val, array)
+        songs.append(Music::fromJson(val.toObject()));
 }
 
 void MainWindow::searchMusic(QString key)
@@ -260,6 +571,30 @@ void MainWindow::setSearchResultTable(SongList songs)
     });
 }
 
+void MainWindow::playLocalSong(Music music)
+{
+
+}
+
+void MainWindow::addDownloadSong(Music music)
+{
+
+}
+
+/**
+ * 放入下载队列、或一首歌下载结束后，下载下一个
+ */
+void MainWindow::downloadNext()
+{
+    // 正在下载的歌已经下载了/即将下载的队列是空的 bool 0 false 1 true
+    if (downloadingSong.isValid() || !toDownLoadSongs.size())
+        return ;
+    Music music = toDownLoadSongs.takeFirst();
+    if (!music.isValid())
+        return downloadNext();
+    downloadSong(music);
+}
+
 QString MainWindow::msecondToString(qint64 msecond)
 {
     return QString("%1:%2").arg(msecond / 1000 / 60, 2, 10, QLatin1Char('0'))
@@ -305,7 +640,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
  */
 bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
-    Q_UNUSED(eventType);
+    Q_UNUSED(eventType)
 
     MSG *param = static_cast<MSG *>(message);
 

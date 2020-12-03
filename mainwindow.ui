@@ -349,7 +349,7 @@ border:none;
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="searchResultPage">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -429,9 +429,15 @@ QTableCornerButton::section
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="cover">
+         <widget class="QLabel" name="playingCoverLable">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -444,16 +450,28 @@ QTableCornerButton::section
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="singer">
+           <widget class="QLabel" name="playingNameLabel">
+            <property name="minimumSize">
+             <size>
+              <width>140</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
-             <string>TextLabel</string>
+             <string/>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="album">
+           <widget class="QLabel" name="playingArtistLabel">
+            <property name="minimumSize">
+             <size>
+              <width>140</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
-             <string>TextLabel</string>
+             <string/>
             </property>
            </widget>
           </item>
