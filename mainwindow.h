@@ -65,7 +65,7 @@ private slots:
 
     void on_searchResultTable_itemActivated(QTableWidgetItem *item);
 
-    void on_searchResultPage_customContextMenuRequested(const QPoint &pos);
+    void on_searchResultTable_customContextMenuRequested(const QPoint &pos);
 
 private:
     Ui::MainWindow *ui;
@@ -106,6 +106,9 @@ private:
 
     void setCurrentCover(const QPixmap& pixmap);
     void setCurrentLyric(QString lyric);
+
+    void addFavorite(SongList musics);
+    void removeFavorite(SongList musics);
 
     // 保存配置
     void saveSongList(QString key, const SongList &songs);

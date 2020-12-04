@@ -112,6 +112,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->searchResultTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->searchResultTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
 
+    searchMusic("周杰伦");
     musicFileDir.mkpath(musicFileDir.absolutePath());
 }
 
@@ -445,7 +446,10 @@ void MainWindow::appendOrderSongs(SongList musics)
 {
 
 }
-
+/**
+ *  下一首播放
+ *  歌单队列置顶
+ */
 void MainWindow::appendNextSongs(SongList musics)
 {
 
@@ -459,6 +463,33 @@ void MainWindow::setCurrentCover(const QPixmap &pixmap)
 void MainWindow::setCurrentLyric(QString lyric)
 {
 
+}
+
+void MainWindow::addFavorite(SongList musics)
+{
+    foreach (Music music, musics)
+    {
+        if (favoriteSongs.contains(music))
+        {
+           qDebug() << "歌曲已存在：" << music.simpleString();
+           continue;
+        }
+        favoriteSongs.append(music);
+        qDebug() <<"添加收藏：" << music.simpleString();
+    }
+    saveSongList("music/favorite", favoriteSongs);
+}
+
+void MainWindow::removeFavorite(SongList musics)
+{
+    foreach (Music music, musics)
+    {
+        if (favoriteSongs.removeOne(music))
+        {
+            qDebug() << "取消收藏：" << music.simpleString();
+        }
+        saveSongList("music/favorite", favoriteSongs);
+    }
 }
 
 void MainWindow::saveSongList(QString key, const SongList &songs)
@@ -746,7 +777,7 @@ void MainWindow::on_searchResultTable_itemActivated(QTableWidgetItem *item)
     }
 }
 
-void MainWindow::on_searchResultPage_customContextMenuRequested(const QPoint &)
+void MainWindow::on_searchResultTable_customContextMenuRequested(const QPoint &)
 {
     auto items= ui->searchResultTable->selectedItems();
 
@@ -766,7 +797,52 @@ void MainWindow::on_searchResultPage_customContextMenuRequested(const QPoint &)
         Music currentsong;
         if (row > -1)
                 currentsong = searchResultSongs.at(row);
+        // 创建菜单对象
+        QMenu* menu = new QMenu(this);
 
+        QAction *playNow = new QAction("立即播放",this);
+        QAction *playNext = new QAction("下一首播放", this);
+        QAction *addToPlayList = new QAction("添加到播放列表", this);
+        QAction *Favorite = new QAction("我的喜欢", this);
+        if (favoriteSongs.contains(currentsong))
+            Favorite->setText("从我的喜欢中移除");
+        else
+            Favorite->setText("添加到我的喜欢");
 
+        // QAction对象添加到菜单上
+        menu->addAction(playNow);
+        menu->addAction(playNext);
+        menu->addAction(addToPlayList);
+        menu->addAction(Favorite);
+
+        // 链接鼠标右键点击信号
+        connect(playNow, &QAction::triggered, [=]{
+            startPlaySong(currentsong);
+        });
+
+        connect(playNext, &QAction::triggered, [=]{
+           appendNextSongs(musics);
+        });
+
+        connect(addToPlayList, &QAction::triggered, [=]{
+            appendOrderSongs(musics);
+        });
+
+        connect(Favorite, &QAction::triggered, [=]{
+            if(!favoriteSongs.contains(currentsong))
+                addFavorite(musics);
+            else
+                removeFavorite(musics);
+
+        });
+
+        // 显示菜单
+        menu->exec(cursor().pos());
+
+        // 释放内存
+        QList<QAction*> list = menu->actions();
+        foreach(QAction* action, list)
+            delete action;
+        delete menu;
     }
 }
