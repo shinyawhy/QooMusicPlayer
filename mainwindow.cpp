@@ -602,9 +602,44 @@ void MainWindow::setSearchResultTable(SongList songs)
     });
 }
 
+/**
+ * 立即开始播放音乐
+ */
 void MainWindow::playLocalSong(Music music)
 {
+    qDebug() << "开始播放" << music.simpleString();
+    if (!isSongDownloaded(music))
+    {
+        qDebug() << "error:未下载歌曲：" << music.simpleString() << "开始下载";
+        playAfterDownloaded = music;
+        downloadSong(music);
+        return ;
+    }
 
+    // 设置信息
+    auto max16 = [=](QString s){
+        if (s.length() > 16)
+            s = s.left(15) + "...";
+        return s;
+    };
+    ui->playingNameLabel->setText(max16(music.name));
+    ui->playingArtistLabel->setText(max16(music.artistNames));
+    ui->all_duration->setText(msecondToString(music.duration));
+    //  设置封面
+    if (QFileInfo(coverPath(music)).exists())
+    {
+        QPixmap pixmap(coverPath(music), "1");
+        if (pixmap.isNull())
+            qDebug() << "warning: 本地封面是空的" << music.simpleString() << coverPath(music);
+         // 自适应高度
+        pixmap = pixmap.scaledToHeight(ui->playingCoverLable->height());
+        ui->playingCoverLable->setPixmap(pixmap);
+        setCurrentCover(pixmap);
+    }
+    else
+    {
+        downloadSongCover(music);
+    }
 }
 
 void MainWindow::addDownloadSong(Music music)
