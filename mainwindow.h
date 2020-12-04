@@ -30,6 +30,7 @@
 #include <QStringListModel>
 #include <QScrollBar>
 #include <QHeaderView>
+#include <QTableWidget>
 #include "musiclist.h"
 
 #ifdef Q_OS_WIN
@@ -61,6 +62,10 @@ private slots:
     void on_search_button_clicked();
 
     void on_search_edit_returnPressed();
+
+    void on_searchResultTable_itemActivated(QTableWidgetItem *item);
+
+    void on_searchResultPage_customContextMenuRequested(const QPoint &pos);
 
 private:
     Ui::MainWindow *ui;
@@ -130,6 +135,7 @@ private:
 
 
     QString msecondToString(qint64 msecond);
+    void activeSong(Music music);
     
     QSettings settings;
     QDir musicFileDir;

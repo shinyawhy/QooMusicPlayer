@@ -601,6 +601,12 @@ QString MainWindow::msecondToString(qint64 msecond)
             .arg(msecond / 1000 % 60, 2, 10, QLatin1Char('0'));
 }
 
+void MainWindow::activeSong(Music music)
+{
+    startPlaySong(music);
+    appendOrderSongs(SongList{music});
+}
+
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     if (isMousePressed == true)
@@ -618,19 +624,23 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     {
         isMousePressed = true;
     }
+    return QMainWindow::mousePressEvent(event);
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     isMousePressed = false;
+    return QMainWindow::mouseReleaseEvent(event);
 }
 
-void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *)
 {
     if(mousePosition.y() <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
     {
         if(windowState() == Qt::WindowMaximized)
+        {
         on_normal_button_clicked();
+        }
         else
         on_max_button_clicked();
     }
@@ -650,7 +660,8 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
        int nX = GET_X_LPARAM(param->lParam) - this->geometry().x();
        int nY = GET_Y_LPARAM(param->lParam) - this->geometry().y();
        // 鼠标位于子控件上， 不进行处理
-       if (childAt(nX, nY) != NULL && childAt(nX, nY) != ui->centralwidget)
+       if ((childAt(nX, nY) != nullptr && childAt(nX, nY) != ui->centralwidget)
+               || nY <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
        {
            return QWidget::nativeEvent(eventType, message, result);
        }
@@ -721,4 +732,41 @@ void MainWindow::on_search_edit_returnPressed()
     QString text = ui->search_edit->text();
     searchMusic(text);
     ui->stackedWidget->setCurrentWidget(ui->searchResultPage);
+}
+
+void MainWindow::on_searchResultTable_itemActivated(QTableWidgetItem *item)
+{
+    if (searchResultSongs.size())
+    {
+        Music music = searchResultSongs.at(item->row());
+    }
+    else if (searchResultPlayLists.size())
+    {
+
+    }
+}
+
+void MainWindow::on_searchResultPage_customContextMenuRequested(const QPoint &)
+{
+    auto items= ui->searchResultTable->selectedItems();
+
+    // 是歌曲搜索结果
+    if (searchResultSongs.size())
+    {
+        QList<Music> musics;
+        foreach (auto item, items)
+        {
+            int row = ui->searchResultTable->row(item);
+            int col = ui->searchResultTable->column(item);
+            if (col != 0)
+                continue;
+            musics.append(searchResultSongs.at(row));
+        }
+        int row = ui->searchResultTable->currentRow();
+        Music currentsong;
+        if (row > -1)
+                currentsong = searchResultSongs.at(row);
+
+
+    }
 }
