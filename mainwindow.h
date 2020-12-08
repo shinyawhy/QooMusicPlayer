@@ -67,6 +67,12 @@ private slots:
 
     void on_searchResultTable_customContextMenuRequested(const QPoint &pos);
 
+    void on_play_list_button_clicked();
+
+    void on_stackedWidget_currentChanged(int index);
+
+    void on_MusicTable_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
 
@@ -89,6 +95,7 @@ private:
     void searchMusic(QString key);                      // 搜索音乐
     void setSearchResultTable(SongList songs);          // 搜索结果数据到table
     void setSearchResultTable(PlayListList playLists);
+    void setPlayListTable(SongList songs);
 
     // 下载音乐
     void playLocalSong(Music music);
@@ -102,6 +109,7 @@ private:
     void startPlaySong(Music music);
     void playNext();
     void appendOrderSongs(SongList musics);
+    void removeOrderSongs(SongList musics);
     void appendNextSongs(SongList musics);
 
     void setCurrentCover(const QPixmap& pixmap);
@@ -132,6 +140,7 @@ private:
 
     SongList orderSongs;             // 播放列表
     SongList favoriteSongs;          // 我的喜欢
+    SongList localSongs;             // 本地歌曲
     SongList toDownLoadSongs;        // 即将下载
 
     QPixmap currentCover;
@@ -139,6 +148,7 @@ private:
 
     QString msecondToString(qint64 msecond);
     void activeSong(Music music);
+    bool isNotPlaying() const;
     
     QSettings settings;
     QDir musicFileDir;
@@ -165,5 +175,7 @@ signals:
     void signalSongDownLoadFinished(Music music);
     void signalLyricDownloadFinished(Music music);
     void signalCoverDownloadFinished(Music music);
+
+    void signalSongPlayStarted(Music music);
 };
 #endif // MAINWINDOW_H

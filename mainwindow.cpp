@@ -5,7 +5,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
     settings(QApplication::applicationDirPath() + "/musics.ini", QSettings::Format::IniFormat),
-    musicFileDir(QApplication::applicationDirPath() + "/musics")
+    musicFileDir(QApplication::applicationDirPath() + "/musics"),
+    player(new QMediaPlayer(this))
 {
     ui->setupUi(this);
 
@@ -111,6 +112,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->scrollArea->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->searchResultTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->searchResultTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
+    ui->MusicTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
+    ui->MusicTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
+
+    // 读取数据
+    ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
+    restoreSongList("music/order", orderSongs);
 
     searchMusic("周杰伦");
     musicFileDir.mkpath(musicFileDir.absolutePath());
@@ -441,9 +448,37 @@ void MainWindow::playNext()
     emit signalOrderSongPlayed(music);
 
 }
-
+/**
+ * 添加到歌单（队尾）
+ */
 void MainWindow::appendOrderSongs(SongList musics)
 {
+    foreach (Music music, musics)
+    {
+        if (orderSongs.contains(music))
+            continue ;
+        orderSongs.append(music);
+        addDownloadSong(music);
+    }
+
+     if (isNotPlaying() && orderSongs.size())
+     {
+         qDebug() << "当前未播放， 开始播放列表";
+//         startPlaySong(orderSongs.takeFirst());
+     }
+     saveSongList("music/order", orderSongs);
+     downloadNext();
+}
+
+void MainWindow::removeOrderSongs(SongList musics)
+{
+    foreach (Music music, musics)
+    {
+        if (orderSongs.contains(music))
+            orderSongs.removeOne(music);
+    }
+    saveSongList("music/order", orderSongs);
+    setPlayListTable(orderSongs);
 
 }
 /**
@@ -452,7 +487,21 @@ void MainWindow::appendOrderSongs(SongList musics)
  */
 void MainWindow::appendNextSongs(SongList musics)
 {
+    foreach (Music music, musics)
+    {
+        if (orderSongs.contains(music))
+            orderSongs.removeOne(music);
+        orderSongs.insert(0, music);
+        addDownloadSong(music);
+    }
 
+//    if (isNotPlaying() && musics.size())
+//    {
+//        qDebug() << "当前未播放， 开始播放本首歌";
+//        startPlaySong(orderSongs.takeFirst());
+//    }
+    saveSongList("music/order", orderSongs);
+    downloadNext();
 }
 
 void MainWindow::setCurrentCover(const QPixmap &pixmap)
@@ -602,6 +651,57 @@ void MainWindow::setSearchResultTable(SongList songs)
     });
 }
 
+void MainWindow::setPlayListTable(SongList songs)
+{
+    QTableWidget* table = ui->MusicTable;
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//    table->horizontalHeader()->setStretchLastSection(true); //设置充满表宽度
+    table->clear();
+
+    // 设置Table标题
+    enum{
+        titleCol,
+        artistCol,
+        albumCol,
+        durationCol
+    };
+    table->setColumnCount(4);
+    QStringList headers{"标题", "作者", "专辑", "时长"};
+    table->setHorizontalHeaderLabels(headers);
+    for (int i = 0; i < 4; i++)
+    {
+        table->horizontalHeaderItem(i)->setSizeHint(QSize(ui->Musicpage->width() / 4, 32));
+    }
+    // 设置列长度
+    QFontMetrics fm(font());
+    int fw = fm.horizontalAdvance("一二三四五六七八九十十一十二十三十四十五");
+    auto createItem = [=](QString s){
+        QTableWidgetItem *item = new QTableWidgetItem();
+        if (s.length() > 16 && fm.horizontalAdvance(s) > fw)
+        {
+            item->setToolTip(s);
+            s = s.left(15) + "...";
+        }
+        item->setText(s);
+        return item;
+    };
+
+    table->setRowCount(songs.size());
+    for (int row = 0; row < songs.size(); row++)
+    {
+       Music song = songs.at(row);
+       table->setItem(row, titleCol, createItem(song.name));
+       table->setItem(row, artistCol, createItem(song.artistNames));
+       table->setItem(row, albumCol, createItem(song.album.name));
+       table->setItem(row, durationCol, createItem(msecondToString(song.duration)));
+    }
+
+    QTimer::singleShot(0, [=]{
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    });
+
+}
+
 /**
  * 立即开始播放音乐
  */
@@ -640,11 +740,24 @@ void MainWindow::playLocalSong(Music music)
     {
         downloadSongCover(music);
     }
+
+    // 开始播放
+    playingSong = music;
+    player->setMedia(QUrl::fromLocalFile(songPath(music)));
+    player->setPosition(0);
+    player->play();
+    emit signalSongPlayStarted(music);
+    setWindowTitle(music.name);
 }
 
+/**
+ * 放入下载队列，准备下载（并不立即下载）
+ */
 void MainWindow::addDownloadSong(Music music)
 {
-
+    if (isSongDownloaded(music) || toDownLoadSongs.contains(music) || downloadingSong == music)
+       return ;
+    toDownLoadSongs.append(music);
 }
 
 /**
@@ -671,6 +784,12 @@ void MainWindow::activeSong(Music music)
 {
     startPlaySong(music);
     appendOrderSongs(SongList{music});
+}
+
+bool MainWindow::isNotPlaying() const
+{
+    return player->state() != QMediaPlayer::PlayingState
+            && (!playingSong.isValid() || player->position() == 0);
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
@@ -880,4 +999,79 @@ void MainWindow::on_searchResultTable_customContextMenuRequested(const QPoint &)
             delete action;
         delete menu;
     }
+}
+
+void MainWindow::on_play_list_button_clicked()
+{
+    setPlayListTable(orderSongs);
+    ui->stackedWidget->setCurrentWidget(ui->Musicpage);
+}
+
+void MainWindow::on_stackedWidget_currentChanged(int index)
+{
+    settings.setValue("stackWidget/pageIndex", index);
+}
+
+void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
+{
+    qDebug() << " 11111";
+    auto items = ui->MusicTable->selectedItems();
+
+    QList<Music> musics;
+    foreach(auto item, items)
+    {
+        int row = ui->MusicTable->row(item);
+        int col = ui->MusicTable->column(item);
+        if (col != 0)
+            continue;
+        musics.append(orderSongs.at(row));
+    }
+    int row = ui->MusicTable->currentRow();
+    Music currentsong;
+    if (row > -1)
+        currentsong = orderSongs.at(row);
+
+    QMenu* menu = new QMenu(this);
+
+    QAction *playNow = new QAction("立即播放", this);
+    QAction *playNext = new QAction("下一首播放", this);
+    QAction *removeToPlayList = new QAction("从播放列表中移除", this);
+    QAction *Favorite = new QAction("我的喜欢", this);
+    if (favoriteSongs.contains(currentsong))
+        Favorite->setText("从我的喜欢中移除");
+    else
+        Favorite->setText("添加到我的喜欢");
+
+    menu->addAction(playNow);
+    menu->addAction(playNext);
+    menu->addAction(removeToPlayList);
+    menu->addAction(Favorite);
+
+    connect(playNow, &QAction::triggered, [=]{
+       startPlaySong(currentsong);
+    });
+
+    connect(playNext, &QAction::triggered, [=]{
+       appendNextSongs(musics);
+    });
+
+    connect(removeToPlayList, &QAction::triggered, [=]{
+        removeOrderSongs(musics);
+    });
+
+    connect(Favorite, &QAction::triggered, [=]{
+        if (!favoriteSongs.contains(currentsong))
+            addFavorite(musics);
+        else
+            removeFavorite(musics);
+    });
+
+    // 显示菜单
+    menu->exec(cursor().pos());
+
+    // 释放内存
+    QList<QAction*> list = menu->actions();
+    foreach(QAction* action, list)
+        delete action;
+    delete menu;
 }

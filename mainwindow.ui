@@ -247,7 +247,7 @@ background-color:transparent;
 }</string>
           </property>
           <property name="text">
-           <string>当前播放</string>
+           <string>播放列表</string>
           </property>
           <property name="icon">
            <iconset resource="icon.qrc">
@@ -335,7 +335,7 @@ background-color:transparent;
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="listWidget">
+         <widget class="QListWidget" name="MusiclistWidget">
           <property name="styleSheet">
            <string notr="true">QListWidget{
 background-color:transparent;
@@ -344,14 +344,38 @@ border:none;
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>新建歌单</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="styleSheet">
+         <string notr="true">QStackWidget
+{
+	background: transparent;
+	border: none;
+}</string>
+        </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="searchResultPage">
+         <property name="styleSheet">
+          <string notr="true">QWidget{
+	
+	background-color: transparent;
+	border: none;
+}
+QTableCornerButton::section{
+	background-color: transparent;
+}</string>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QTableWidget" name="searchResultTable">
@@ -371,13 +395,61 @@ QHeaderView::section
 	background-color: transparent;
 }
 
-QTableCornerButton::section
+QTableView QTableCornerButton::section
 {
 	background:transparent;
 }</string>
             </property>
             <property name="editTriggers">
              <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
+            </property>
+            <property name="showGrid">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="Musicpage">
+         <property name="styleSheet">
+          <string notr="true">QWidget{
+	
+	background-color: transparent;
+	border: none;
+}
+QTableCornerButton::section{
+	background-color: transparent;
+}</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QTableWidget" name="MusicTable">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QTableWidget
+{
+	background: transparent;
+	border: none;
+	alternate-background-color: rgba(132, 136, 139, 20);
+}
+
+QHeaderView::section
+{
+	background-color: transparent;
+}
+
+QTableView QTableCornerButton::section
+{
+	background:transparent;
+}</string>
+            </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
             </property>
             <property name="showGrid">
              <bool>false</bool>
@@ -387,6 +459,9 @@ QTableCornerButton::section
          </layout>
         </widget>
         <widget class="QWidget" name="lyricsPage">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <widget class="QScrollArea" name="scrollArea">
