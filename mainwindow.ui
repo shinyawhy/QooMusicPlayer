@@ -30,9 +30,7 @@
       <item>
        <widget class="QPushButton" name="logo_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string>QooMusic</string>
@@ -135,9 +133,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="menu_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -154,9 +150,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="min_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -173,9 +167,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="normal_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -192,9 +184,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="max_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -211,9 +201,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="close_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -242,9 +230,7 @@ background-color:transparent;
         <item>
          <widget class="QPushButton" name="play_list_button">
           <property name="styleSheet">
-           <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>播放列表</string>
@@ -261,9 +247,7 @@ background-color:transparent;
         <item>
          <widget class="QPushButton" name="local_music_button">
           <property name="styleSheet">
-           <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>本地歌曲</string>
@@ -280,9 +264,7 @@ background-color:transparent;
         <item>
          <widget class="QPushButton" name="my_favorite_button">
           <property name="styleSheet">
-           <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string> 我的喜欢</string>
@@ -299,9 +281,7 @@ background-color:transparent;
         <item>
          <widget class="QPushButton" name="recommond_music_button">
           <property name="styleSheet">
-           <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>每日推荐</string>
@@ -318,9 +298,7 @@ background-color:transparent;
         <item>
          <widget class="QPushButton" name="my_song_list_button">
           <property name="styleSheet">
-           <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>我的歌单</string>
@@ -346,11 +324,6 @@ border:none;
         </item>
         <item>
          <widget class="QPushButton" name="pushButton">
-          <property name="styleSheet">
-           <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
-          </property>
           <property name="text">
            <string>新建歌单</string>
           </property>
@@ -620,9 +593,7 @@ QTableView QTableCornerButton::section
       <item>
        <widget class="QPushButton" name="back_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -639,9 +610,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="play_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -658,9 +627,7 @@ background-color:transparent;
       <item>
        <widget class="QPushButton" name="forward_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -712,9 +679,7 @@ QSlider::sub-page:horizontal{background-color:rgb(26,217,110);}</string>
       <item>
        <widget class="QPushButton" name="lyric_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -729,30 +694,9 @@ background-color:transparent;
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="mode_button">
-        <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icon.qrc">
-          <normaloff>:/icon/list_circle</normaloff>:/icon/list_circle</iconset>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="sound_button">
         <property name="styleSheet">
-         <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+         <string notr="true"/>
         </property>
         <property name="text">
          <string/>
@@ -760,6 +704,23 @@ background-color:transparent;
         <property name="icon">
          <iconset resource="icon.qrc">
           <normaloff>:/icon/sound</normaloff>:/icon/sound</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="mode_button">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icon.qrc">
+          <normaloff>:/icon/list_circle</normaloff>:/icon/list_circle</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

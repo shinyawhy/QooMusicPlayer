@@ -21,9 +21,9 @@
         <file alias="songslist">icon/songslist.png</file>
         <file alias="handle">icon/handle.png</file>
         <file alias="min">icon/min.png</file>
-        <file alias="add">icon/加号.png</file>
-        <file alias="mute">icon/静音.png</file>
         <file alias="hide">icon/lyric_hide.png</file>
         <file alias="lyric">icon/lryic.png</file>
+        <file alias="mute">icon/mute.png</file>
+        <file alias="add">icon/plus.png</file>
     </qresource>
 </RCC>

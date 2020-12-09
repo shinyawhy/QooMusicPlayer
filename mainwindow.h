@@ -31,7 +31,9 @@
 #include <QScrollBar>
 #include <QHeaderView>
 #include <QTableWidget>
+#include <QSlider>
 #include "musiclist.h"
+#include "volumecontrol.h"
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -81,6 +83,10 @@ private slots:
 
     void SlotSongPlayEnd();
 
+    void on_play_button_clicked();
+
+    void on_sound_button_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -88,10 +94,7 @@ private:
 
     // 初始化
     void initUI();              // 初始化UI
-    void initPlayer();          // 初始化播放器相关
     void initSqlite();          // 初始化sql数据库
-    void initSettings();        // 初始化配置文件
-    void initMusicList();       // 初始化歌单
     void initMenuAction();      // 初始化右键菜单
     void initSystemTrayIcon();  // 初始化系统托盘
     

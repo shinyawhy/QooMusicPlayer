@@ -13,18 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // UI初始化
     initUI();
-
-    // 播放器初始化
-    initPlayer();
-
     // 数据库初始化
     initSqlite();
-
-    // 配置文件初始化
-    initSettings();
-
-    // 歌单初始化
-    initMusicList();
 
     setWindowFlags(Qt::FramelessWindowHint| Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint);
     QHeaderView* header = ui->searchResultTable->horizontalHeader();
@@ -131,8 +121,22 @@ MainWindow::MainWindow(QWidget *parent)
     // 读取数据
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
     restoreSongList("music/order", orderSongs);
+    if(orderSongs.size())
+    {
+        startPlaySong(orderSongs.first());
+    }
 
-    searchMusic("五月天");
+
+    int volume = settings.value("music/volume", 50).toInt();
+    bool mute = settings.value("music/mute", false).toBool();
+    if (mute)
+    {
+        volume = 0;
+
+        ui->sound_button->setIcon(QIcon(":/icon/mute"));
+
+    }
+    player->setVolume(volume);
     musicFileDir.mkpath(musicFileDir.absolutePath());
 }
 
@@ -151,25 +155,11 @@ void MainWindow::initUI()
 
 }
 
-void MainWindow::initPlayer()
-{
-
-}
-
 void MainWindow::initSqlite()
 {
 
 }
 
-void MainWindow::initSettings()
-{
-
-}
-
-void MainWindow::initMusicList()
-{
-
-}
 
 void MainWindow::initMenuAction()
 {
@@ -1262,4 +1252,42 @@ void MainWindow::SlotSongPlayEnd()
     ui->playingCoverLablel->clear();
 
     playNext();
+}
+
+/**
+ * 暂停、播放
+ */
+void MainWindow::on_play_button_clicked()
+{
+    if (player->state() == QMediaPlayer::PlayingState)
+    {
+        player->pause();
+        ui->play_button->setIcon(QIcon(":/icon/pause"));
+    }
+    else
+    {
+        if (!playingSong.isValid())
+        {
+            playNext();
+            return ;
+        }
+        player->play();
+        ui->play_button->setIcon(QIcon(":icon/play"));
+    }
+}
+
+void MainWindow::on_sound_button_clicked()
+{
+    volumecontrol *vc = new volumecontrol(player, settings, this);
+    int height = vc->height();
+    int width = vc->width();
+    int x = ui->sound_button->pos().x();
+    int y = ui->sound_button->pos().y();
+    int pos_x = x  + (ui->sound_button->width() / 2) - (width/ 2);
+    int pos_y = y - (height + (ui->sound_button->height() / 2));
+
+    vc->setGeometry(QRect(mapToGlobal(QPoint(pos_x, pos_y)), QSize(width, height)));
+
+    vc->exec();
+    vc->deleteLater();
 }

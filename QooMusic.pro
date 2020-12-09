@@ -20,16 +20,19 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     music.cpp \
-    musiclist.cpp
+    musiclist.cpp \
+    volumecontrol.cpp
 
 HEADERS += \
     LyricStreamWidget.h \
     mainwindow.h \
     musicbeans.h \
-    musiclist.h
+    musiclist.h \
+    volumecontrol.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    volumecontrol.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
