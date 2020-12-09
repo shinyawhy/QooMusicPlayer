@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow),
     settings(QApplication::applicationDirPath() + "/musics.ini", QSettings::Format::IniFormat),
     musicFileDir(QApplication::applicationDirPath() + "/musics"),
+    downloadedMusicFileDir(QApplication::applicationDirPath() + "/downloaded"),
     player(new QMediaPlayer(this))
 {
     ui->setupUi(this);
@@ -25,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 歌单初始化
     initMusicList();
 
-    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::FramelessWindowHint| Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint);
     QHeaderView* header = ui->searchResultTable->horizontalHeader();
     header->setSectionResizeMode(QHeaderView::ResizeToContents);    // 自适应列宽
     header->setMinimumSectionSize(QFontMetrics(this->font()).horizontalAdvance("一二三四五六"));
@@ -115,11 +116,23 @@ MainWindow::MainWindow(QWidget *parent)
     ui->MusicTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->MusicTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
 
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status){
+        if (status == QMediaPlayer::EndOfMedia)
+        {
+            SlotSongPlayEnd();
+        }
+        else if (status == QMediaPlayer::InvalidMedia)
+        {
+            qDebug() << "无效媒体：" << playingSong.simpleString();
+            playNext();
+        }
+    });
+
     // 读取数据
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
     restoreSongList("music/order", orderSongs);
 
-    searchMusic("周杰伦");
+    searchMusic("五月天");
     musicFileDir.mkpath(musicFileDir.absolutePath());
 }
 
@@ -241,11 +254,38 @@ void MainWindow::downloadSong(Music music)
             {
                 if (orderSongs.contains(music))
                 {
-                    orderSongs.removeOne(music);
+                   orderSongs.removeOne(music);
+                   settings.setValue("music/currentSong", "");
+                   ui->playingNameLabel->clear();
+                   // 设置信息
+                   auto max16 = [=](QString s){
+                       if (s.length() > 16)
+                           s = s.left(15) + "...";
+                       return s;
+                   };
+                   ui->playingNameLabel->setText(max16(music.name));
+                   ui->playingArtistLabel->setText(max16(music.artistNames));
+                   //  设置封面
+                   if (QFileInfo(coverPath(music)).exists())
+                   {
+                       QPixmap pixmap(coverPath(music), "1");
+                       if (pixmap.isNull())
+                           qDebug() << "warning: 本地封面是空的" << music.simpleString() << coverPath(music);
+                        // 自适应高度
+                       pixmap = pixmap.scaledToHeight(ui->playingCoverLablel->height());
+                       ui->playingCoverLablel->setPixmap(pixmap);
+                       setCurrentCover(pixmap);
+                   }
+                   else
+                   {
+                       downloadSongCover(music);
+                   }
+                   player->stop();
                 }
+                saveSongList("music/order", orderSongs);
+                setPlayListTable(orderSongs);
                 playNext();
             }
-
             downloadingSong = Music();
             downloadNext();
             return ;
@@ -398,8 +438,8 @@ void MainWindow::downloadSongCover(Music music)
             // 正是当前要播放的歌曲
             if (playAfterDownloaded == music || playingSong == music)
             {
-                pixmap = pixmap.scaledToHeight(ui->playingCoverLable->height());
-                ui->playingCoverLable->setPixmap(pixmap);
+                pixmap = pixmap.scaledToHeight(ui->playingCoverLablel->height());
+                ui->playingCoverLablel->setPixmap(pixmap);
                 setCurrentCover(pixmap);
             }
         }
@@ -425,6 +465,10 @@ void MainWindow::startPlaySong(Music music)
         playAfterDownloaded = music;
         downloadSong(music);
     }
+    if (!orderSongs.contains(music))
+    orderSongs.append(music);
+    saveSongList("music/order", orderSongs);
+    setPlayListTable(orderSongs);
 }
 
 void MainWindow::playNext()
@@ -440,9 +484,23 @@ void MainWindow::playNext()
         return ;
     }
 
-    Music music = orderSongs.takeFirst();
+    orderSongs.removeFirst();
     saveSongList("music/order", orderSongs);
-    // TODO setSongModelToView
+    setPlayListTable(orderSongs);
+
+    if (!orderSongs.size())
+    {
+        if(!favoriteSongs.size())
+            return ;
+
+        int r = qrand() % favoriteSongs.size();
+        startPlaySong(favoriteSongs.at(r));
+        return ;
+    }
+
+    Music music = orderSongs.first();
+    saveSongList("music/order", orderSongs);
+    setPlayListTable(orderSongs);
 
     startPlaySong(music);
     emit signalOrderSongPlayed(music);
@@ -464,9 +522,10 @@ void MainWindow::appendOrderSongs(SongList musics)
      if (isNotPlaying() && orderSongs.size())
      {
          qDebug() << "当前未播放， 开始播放列表";
-//         startPlaySong(orderSongs.takeFirst());
+         startPlaySong(orderSongs.first());
      }
      saveSongList("music/order", orderSongs);
+     setPlayListTable(orderSongs);
      downloadNext();
 }
 
@@ -474,9 +533,18 @@ void MainWindow::removeOrderSongs(SongList musics)
 {
     foreach (Music music, musics)
     {
-        if (orderSongs.contains(music))
-            orderSongs.removeOne(music);
+//        orderSongs.removeOne(music);
+        if (playingSong == music)
+        {
+            settings.setValue("music/currentSong", "");
+            ui->playingNameLabel->clear();
+            ui->playingArtistLabel->clear();
+            ui->playingCoverLablel->clear();
+            player->stop();
+            // 下一首歌，没有就不放
+        }
     }
+    playNext();
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs);
 
@@ -495,12 +563,13 @@ void MainWindow::appendNextSongs(SongList musics)
         addDownloadSong(music);
     }
 
-//    if (isNotPlaying() && musics.size())
-//    {
-//        qDebug() << "当前未播放， 开始播放本首歌";
-//        startPlaySong(orderSongs.takeFirst());
-//    }
+    if (isNotPlaying() && musics.size())
+    {
+        qDebug() << "当前未播放， 开始播放本首歌";
+        startPlaySong(orderSongs.first());
+    }
     saveSongList("music/order", orderSongs);
+    setPlayListTable(orderSongs);
     downloadNext();
 }
 
@@ -560,7 +629,7 @@ void MainWindow::restoreSongList(QString key, SongList &songs)
 void MainWindow::searchMusic(QString key)
 {
     if (key.trimmed().isEmpty())
-        return;
+        return;    
     QString url = "http://iwxyi.com:3000/search?keywords=" + key.toUtf8().toPercentEncoding();
     QNetworkAccessManager* manager = new QNetworkAccessManager;
     QNetworkRequest* request = new QNetworkRequest(url);
@@ -732,8 +801,8 @@ void MainWindow::playLocalSong(Music music)
         if (pixmap.isNull())
             qDebug() << "warning: 本地封面是空的" << music.simpleString() << coverPath(music);
          // 自适应高度
-        pixmap = pixmap.scaledToHeight(ui->playingCoverLable->height());
-        ui->playingCoverLable->setPixmap(pixmap);
+        pixmap = pixmap.scaledToHeight(ui->playingCoverLablel->height());
+        ui->playingCoverLablel->setPixmap(pixmap);
         setCurrentCover(pixmap);
     }
     else
@@ -748,6 +817,22 @@ void MainWindow::playLocalSong(Music music)
     player->play();
     emit signalSongPlayStarted(music);
     setWindowTitle(music.name);
+
+    // 添加到本地歌曲
+    if (localSongs.contains(music))
+    {
+        qDebug() << "本地歌曲中已存在：" << music.simpleString();
+        return ;
+    }
+    else
+    {
+        localSongs.append(music);
+        saveSongList("music/local", localSongs);
+    }
+
+    // 保存当前歌曲
+    settings.setValue("music/currentSong", music.toJson());
+
 }
 
 /**
@@ -914,6 +999,7 @@ void MainWindow::on_search_button_clicked()
 
 void MainWindow::on_search_edit_returnPressed()
 {
+    ui->searchResultTable->clear();
     QString text = ui->search_edit->text();
     searchMusic(text);
     ui->stackedWidget->setCurrentWidget(ui->searchResultPage);
@@ -1014,7 +1100,6 @@ void MainWindow::on_stackedWidget_currentChanged(int index)
 
 void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
 {
-    qDebug() << " 11111";
     auto items = ui->MusicTable->selectedItems();
 
     QList<Music> musics;
@@ -1074,4 +1159,107 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
     foreach(QAction* action, list)
         delete action;
     delete menu;
+}
+
+void MainWindow::on_local_music_button_clicked()
+{
+    setPlayListTable(localSongs);
+    ui->stackedWidget->setCurrentWidget(ui->localMusicpage);
+}
+
+void MainWindow::on_localMusicTable_customContextMenuRequested(const QPoint &)
+{
+    auto items = ui->localMusicTable->selectedItems();
+
+    QList<Music> musics;
+    foreach (auto item, items)
+    {
+        int row = ui->localMusicTable->row(item);
+        int col = ui->localMusicTable->column(item);
+        if (col != 0)
+            continue;
+        musics.append(localSongs.at(row));
+    }
+    int row = ui->localMusicTable->currentRow();
+    Music currentsong;
+    if (row > -1)
+        currentsong = localSongs.at(row);
+
+    QMenu* menu = new QMenu(this);
+
+    QAction *playNow = new QAction("立即播放", this);
+    QAction *playNext = new QAction("下一首播放", this);
+    QAction *addToPlayList = new QAction("添加到播放列表", this);
+    QAction *Favorite = new QAction("我的喜欢", this);
+    if (favoriteSongs.contains(currentsong))
+        Favorite->setText("从我的喜欢中移除");
+    else
+        Favorite->setText("添加到我的喜欢");
+
+    menu->addAction(playNow);
+    menu->addAction(playNext);
+    menu->addAction(addToPlayList);
+    menu->addAction(Favorite);
+
+    // 链接鼠标右键点击信号
+    connect(playNow, &QAction::triggered, [=]{
+        startPlaySong(currentsong);
+    });
+
+    connect(playNext, &QAction::triggered, [=]{
+       appendNextSongs(musics);
+    });
+
+    connect(addToPlayList, &QAction::triggered, [=]{
+        appendOrderSongs(musics);
+    });
+
+    connect(Favorite, &QAction::triggered, [=]{
+        if(!favoriteSongs.contains(currentsong))
+            addFavorite(musics);
+        else
+            removeFavorite(musics);
+
+    });
+
+    // 显示菜单
+    menu->exec(cursor().pos());
+
+    // 释放内存
+    QList<QAction*> list = menu->actions();
+    foreach(QAction* action, list)
+        delete action;
+    delete menu;
+
+}
+
+
+void MainWindow::on_searchResultTable_itemDoubleClicked(QTableWidgetItem *item)
+{
+    int row = ui->searchResultTable->row(item);
+    Music currentsong;
+    if (row > -1 )
+        currentsong = searchResultSongs.at(row);
+    if (orderSongs.contains(currentsong))
+    {
+        orderSongs.removeOne(currentsong);
+        setPlayListTable(orderSongs);
+    }
+    else
+        orderSongs.insert(0, currentsong);
+    startPlaySong(currentsong);
+}
+
+void MainWindow::SlotSongPlayEnd()
+{
+    emit signalSongPlayFinished(playingSong);
+
+    //清除播放
+    playingSong = Music();
+    settings.setValue("music/currentSong", "");
+    ui->playingNameLabel->clear();
+    ui->playingArtistLabel->clear();
+    ui->playingCoverLablel->clear();
+
+    playNext();
 }

@@ -13,7 +13,6 @@
         <file alias="like">icon/like.png</file>
         <file alias="list_circle">icon/list_circle.png</file>
         <file alias="local">icon/local.png</file>
-        <file alias="lyric">icon/lryic.png</file>
         <file alias="random">icon/random.png</file>
         <file alias="recommond">icon/recommond.png</file>
         <file alias="single_circle">icon/single_circle.png</file>
@@ -22,5 +21,9 @@
         <file alias="songslist">icon/songslist.png</file>
         <file alias="handle">icon/handle.png</file>
         <file alias="min">icon/min.png</file>
+        <file alias="add">icon/加号.png</file>
+        <file alias="mute">icon/静音.png</file>
+        <file alias="hide">icon/lyric_hide.png</file>
+        <file alias="lyric">icon/lryic.png</file>
     </qresource>
 </RCC>

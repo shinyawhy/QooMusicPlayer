@@ -346,8 +346,20 @@ border:none;
         </item>
         <item>
          <widget class="QPushButton" name="pushButton">
+          <property name="styleSheet">
+           <string notr="true">QPushButton{
+background-color:transparent;
+}</string>
+          </property>
           <property name="text">
            <string>新建歌单</string>
+          </property>
+          <property name="icon">
+           <iconset resource="icon.qrc">
+            <normaloff>:/icon/add</normaloff>:/icon/add</iconset>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -458,6 +470,48 @@ QTableView QTableCornerButton::section
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="localMusicpage">
+         <property name="styleSheet">
+          <string notr="true">QWidget{
+	
+	background-color: transparent;
+	border: none;
+}
+QTableCornerButton::section{
+	background-color: transparent;
+}</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QTableWidget" name="localMusicTable">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QTableWidget
+{
+	background: transparent;
+	border: none;
+	alternate-background-color: rgba(132, 136, 139, 20);
+}
+
+QHeaderView::section
+{
+	background-color: transparent;
+}
+
+QTableView QTableCornerButton::section
+{
+	background:transparent;
+}</string>
+            </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
         <widget class="QWidget" name="lyricsPage">
          <property name="styleSheet">
           <string notr="true"/>
@@ -480,8 +534,8 @@ QTableView QTableCornerButton::section
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>555</width>
-               <height>464</height>
+               <width>57</width>
+               <height>16</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -513,7 +567,7 @@ QTableView QTableCornerButton::section
          <number>0</number>
         </property>
         <item>
-         <widget class="QLabel" name="playingCoverLable">
+         <widget class="QLabel" name="playingCoverLablel">
           <property name="minimumSize">
            <size>
             <width>40</width>
@@ -667,7 +721,7 @@ background-color:transparent;
         </property>
         <property name="icon">
          <iconset resource="icon.qrc">
-          <normaloff>:/icon/lyric</normaloff>:/icon/lyric</iconset>
+          <normaloff>:/icon/hide</normaloff>:/icon/hide</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

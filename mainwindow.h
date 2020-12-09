@@ -73,6 +73,14 @@ private slots:
 
     void on_MusicTable_customContextMenuRequested(const QPoint &pos);
 
+    void on_local_music_button_clicked();
+
+    void on_localMusicTable_customContextMenuRequested(const QPoint &pos);
+
+    void on_searchResultTable_itemDoubleClicked(QTableWidgetItem *item);
+
+    void SlotSongPlayEnd();
+
 private:
     Ui::MainWindow *ui;
 
@@ -143,6 +151,8 @@ private:
     SongList localSongs;             // 本地歌曲
     SongList toDownLoadSongs;        // 即将下载
 
+    bool isSongDownFailed = false;
+
     QPixmap currentCover;
 
 
@@ -151,7 +161,8 @@ private:
     bool isNotPlaying() const;
     
     QSettings settings;
-    QDir musicFileDir;
+    QDir musicFileDir;   // 用于程序识别
+    QDir downloadedMusicFileDir; // 已下载的歌曲资源
     const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
 protected:
@@ -164,7 +175,7 @@ protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 
     QPoint mousePosition;
-    bool isMousePressed;
+    bool isMousePressed = false;
 
     const static int pos_min_x = 0;
     const static int pos_min_y = 0;
@@ -177,5 +188,7 @@ signals:
     void signalCoverDownloadFinished(Music music);
 
     void signalSongPlayStarted(Music music);
+    void signalSongPlayFinished(Music music);
+
 };
 #endif // MAINWINDOW_H
