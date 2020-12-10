@@ -1349,3 +1349,9 @@ void MainWindow::slotPlayerPositionChanged()
    ui->playProgressSlider->setSliderPosition(static_cast<int>(position));
    update();
 }
+
+void MainWindow::on_playProgressSlider_sliderMoved(int position)
+{
+    player->setPosition(position);
+}
+

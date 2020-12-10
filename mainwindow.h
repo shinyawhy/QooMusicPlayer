@@ -53,6 +53,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
+    enum PlayCirecleMode
+    {
+      OrderList,    // 顺序
+      SingleList,   // 单曲
+      RandomList,   // 随机
+
+    };
+
 private slots:
     void on_close_button_clicked();
 
@@ -89,6 +97,8 @@ private slots:
     void on_sound_button_clicked();
 
     void slotPlayerPositionChanged();
+
+    void on_playProgressSlider_sliderMoved(int position);
 
 private:
     Ui::MainWindow *ui;
