@@ -16,7 +16,16 @@ MainWindow::MainWindow(QWidget *parent)
     // 数据库初始化
     initSqlite();
 
-    setWindowFlags(Qt::FramelessWindowHint| Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint);
+    setWindowFlags(Qt::WindowSystemMenuHint | Qt::FramelessWindowHint |Qt::WindowMinimizeButtonHint|Qt::WindowMaximizeButtonHint);
+
+    FramelessHelper *pHelper = new FramelessHelper(this);
+    pHelper->activateOn(this);  //激活当前窗体
+    pHelper->setTitleHeight(20);  //设置窗体的标题栏高度
+    pHelper->setWidgetMovable(true);  //设置窗体可移动
+    pHelper->setWidgetResizable(true);  //设置窗体可缩放
+    pHelper->setRubberBandOnMove(true);  //设置橡皮筋效果-可移动
+    pHelper->setRubberBandOnResize(true);  //设置橡皮筋效果-可缩放
+
     QHeaderView* header = ui->searchResultTable->horizontalHeader();
     header->setSectionResizeMode(QHeaderView::ResizeToContents);    // 自适应列宽
     header->setMinimumSectionSize(QFontMetrics(this->font()).horizontalAdvance("一二三四五六"));
@@ -908,59 +917,59 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *)
 /**
  * 重写窗体缩放， 仅在Windows环境下有效
  */
-bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
-{
-    Q_UNUSED(eventType)
+//bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+//{
+//    Q_UNUSED(eventType)
 
-    MSG *param = static_cast<MSG *>(message);
+//    MSG *param = static_cast<MSG *>(message);
 
-    switch (param->message) {
-    case WM_NCHITTEST:
-    {
-       int nX = GET_X_LPARAM(param->lParam) - this->geometry().x();
-       int nY = GET_Y_LPARAM(param->lParam) - this->geometry().y();
-       // 鼠标位于子控件上， 不进行处理
-       if ((childAt(nX, nY) != nullptr && childAt(nX, nY) != ui->centralwidget)
-               || nY <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
-       {
-           return QWidget::nativeEvent(eventType, message, result);
-       }
-       *result = HTCAPTION;
+//    switch (param->message) {
+//    case WM_NCHITTEST:
+//    {
+//       int nX = GET_X_LPARAM(param->lParam) - this->geometry().x();
+//       int nY = GET_Y_LPARAM(param->lParam) - this->geometry().y();
+//       // 鼠标位于子控件上， 不进行处理
+//       if ((childAt(nX, nY) != nullptr && childAt(nX, nY) != ui->centralwidget)
+//               || nY <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
+//       {
+//           return QWidget::nativeEvent(eventType, message, result);
+//       }
+//       *result = HTCAPTION;
 
-       // 鼠标位于窗体边框， 进行缩放
-       if ((nX > 0) && (nX < 5))
-           *result = HTLEFT;
+//       // 鼠标位于窗体边框， 进行缩放
+//       if ((nX > 0) && (nX < 5))
+//           *result = HTLEFT;
 
-       if ((nX > this->width() - 5) && (nX < this->width()))
-           *result = HTRIGHT;
+//       if ((nX > this->width() - 5) && (nX < this->width()))
+//           *result = HTRIGHT;
 
-       if ((nY > 0) && (nY < 5))
-           *result = HTTOP;
+//       if ((nY > 0) && (nY < 5))
+//           *result = HTTOP;
 
-       if ((nY > this->height() - 5) && (nY < this->height()))
-           *result = HTBOTTOM;
+//       if ((nY > this->height() - 5) && (nY < this->height()))
+//           *result = HTBOTTOM;
 
-       if ((nX > 0) && (nX < 5) && (nY > 0)
-               && (nY < 5))
-           *result = HTTOPLEFT;
+//       if ((nX > 0) && (nX < 5) && (nY > 0)
+//               && (nY < 5))
+//           *result = HTTOPLEFT;
 
-       if ((nX > this->width() - 5) && (nX < this->width())
-               && (nY > 0) && (nY < 5))
-           *result = HTTOPRIGHT;
+//       if ((nX > this->width() - 5) && (nX < this->width())
+//               && (nY > 0) && (nY < 5))
+//           *result = HTTOPRIGHT;
 
-       if ((nX > 0) && (nX < 5)
-               && (nY > this->height() - 5) && (nY < this->height()))
-           *result = HTBOTTOMLEFT;
+//       if ((nX > 0) && (nX < 5)
+//               && (nY > this->height() - 5) && (nY < this->height()))
+//           *result = HTBOTTOMLEFT;
 
-       if ((nX > this->width() - 5) && (nX < this->width())
-               && (nY > this->height() - 5) && (nY < this->height()))
-           *result = HTBOTTOMRIGHT;
+//       if ((nX > this->width() - 5) && (nX < this->width())
+//               && (nY > this->height() - 5) && (nY < this->height()))
+//           *result = HTBOTTOMRIGHT;
 
-       return true;
-    }
-    }
-    return QWidget::nativeEvent(eventType, message, result);
-}
+//       return true;
+//    }
+//    }
+//    return QWidget::nativeEvent(eventType, message, result);
+//}
 
 void MainWindow::on_close_button_clicked()
 {

@@ -34,6 +34,7 @@
 #include <QSlider>
 #include "musiclist.h"
 #include "volumecontrol.h"
+#include "framelesshelper/frameless_helper.h"
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -175,7 +176,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
-    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+//    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 
     QPoint mousePosition;
     bool isMousePressed = false;
