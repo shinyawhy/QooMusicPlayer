@@ -100,6 +100,8 @@ private slots:
 
     void on_playProgressSlider_sliderMoved(int position);
 
+    void on_mode_button_clicked();
+
 private:
     Ui::MainWindow *ui;
 

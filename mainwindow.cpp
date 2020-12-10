@@ -179,6 +179,7 @@ MainWindow::MainWindow(QWidget *parent)
     musicFileDir.mkpath(musicFileDir.absolutePath());
 
     Music currentSong = Music::fromJson(settings.value("music/currentSong").toJsonObject());
+    qDebug()<<currentSong.simpleString();
     if (currentSong.isValid())
     {
         startPlaySong(currentSong);// 还原位置
@@ -528,9 +529,9 @@ void MainWindow::playNext()
 //    orderSongs.removeFirst();
 //    saveSongList("music/order", orderSongs);
 //    setPlayListTable(orderSongs, ui->MusicTable);
-    qDebug()<<"111";
+
     int index = orderSongs.indexOf(playingSong);
-        qDebug()<<index;
+    qDebug()<<index;
     // 最后一首
     if (index == orderSongs.size() - 1)
     {
@@ -550,10 +551,8 @@ void MainWindow::playNext()
 
 //    Music music = orderSongs.first();
     Music music = orderSongs.at(index+1);
- qDebug()<<"index";
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
-
     startPlaySong(music);
     emit signalOrderSongPlayed(music);
 
@@ -1032,6 +1031,7 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *)
 
 void MainWindow::on_close_button_clicked()
 {
+    settings.setValue("music/currentSong",playingSong.toJson());
     close();
 }
 
@@ -1314,7 +1314,9 @@ void MainWindow::SlotSongPlayEnd()
 
     //清除播放
 //    playingSong = Music();
-    settings.setValue("music/currentSong", "");
+    int index = orderSongs.indexOf(playingSong);
+    Music music = orderSongs.at(index + 1);
+    settings.setValue("music/currentSong",music.toJson());
     ui->playingNameLabel->clear();
     ui->playingArtistLabel->clear();
     ui->playingCoverLablel->clear();
@@ -1372,3 +1374,23 @@ void MainWindow::on_playProgressSlider_sliderMoved(int position)
     player->setPosition(position);
 }
 
+
+void MainWindow::on_mode_button_clicked()
+{
+    if(circleMode == OrderList)
+    {
+        circleMode = SingleList;
+        ui->mode_button->setIcon(QIcon(":/icon/single_circle"));
+    }
+    else if (circleMode == SingleList)
+    {
+        circleMode = RandomList;
+        ui->mode_button->setIcon(QIcon(":icon/random"));
+    }
+    else
+    {
+        circleMode = OrderList;
+        ui->mode_button->setIcon(QIcon(":/icon/list_circle"));
+    }
+    settings.setValue("music/mode", circleMode);
+}
