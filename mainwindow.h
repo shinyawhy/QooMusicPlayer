@@ -88,15 +88,15 @@ private slots:
 
     void on_sound_button_clicked();
 
+    void slotPlayerPositionChanged();
+
 private:
     Ui::MainWindow *ui;
 
     void paintEvent(QPaintEvent *event) override;
 
     // 初始化
-    void initUI();              // 初始化UI
     void initSqlite();          // 初始化sql数据库
-    void initMenuAction();      // 初始化右键菜单
     void initSystemTrayIcon();  // 初始化系统托盘
     
     QString songPath(const Music &music) const;
@@ -107,7 +107,7 @@ private:
     void searchMusic(QString key);                      // 搜索音乐
     void setSearchResultTable(SongList songs);          // 搜索结果数据到table
     void setSearchResultTable(PlayListList playLists);
-    void setPlayListTable(SongList songs);
+    void setPlayListTable(SongList songs, QTableWidget* table);
 
     // 下载音乐
     void playLocalSong(Music music);
@@ -156,6 +156,7 @@ private:
     SongList toDownLoadSongs;        // 即将下载
 
     bool isSongDownFailed = false;
+    qint64 setPlayPositionAfterLoad = 0; // 加载后跳转到时间
 
     QPixmap currentCover;
 

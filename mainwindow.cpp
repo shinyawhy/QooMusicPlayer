@@ -11,10 +11,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // UI初始化
-    initUI();
+
     // 数据库初始化
     initSqlite();
+
+    player->setNotifyInterval(100);
 
     setWindowFlags(Qt::WindowSystemMenuHint | Qt::FramelessWindowHint |Qt::WindowMinimizeButtonHint|Qt::WindowMaximizeButtonHint);
 
@@ -127,13 +128,42 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
+    connect(player, &QMediaPlayer::positionChanged, this, [=](qint64 position){
+        ui->now_duration->setText(msecondToString(position));
+        slotPlayerPositionChanged();
+    });
+
+    connect(player, &QMediaPlayer::stateChanged, this, [=](QMediaPlayer::State state){
+        if (state == QMediaPlayer::PlayingState)
+        {
+            ui->play_button->setIcon(QIcon(":/icon/pause"));
+        }
+        else
+        {
+            ui->play_button->setIcon(QIcon(":/icon/play"));
+        }
+    });
+
+    connect(player, &QMediaPlayer::durationChanged, this, [=](qint64 duration){
+        ui->playProgressSlider->setMaximum(static_cast<int>(duration));
+        if (setPlayPositionAfterLoad)
+        {
+            player->setPosition(setPlayPositionAfterLoad);
+            setPlayPositionAfterLoad = 0;
+        }
+    });
+
+
+
+
     // 读取数据
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
     restoreSongList("music/order", orderSongs);
-    if(orderSongs.size())
-    {
-        startPlaySong(orderSongs.first());
-    }
+    restoreSongList("music/local", localSongs);
+//    if(orderSongs.size())
+//    {
+//        startPlaySong(orderSongs.first());
+//    }
 
 
     int volume = settings.value("music/volume", 50).toInt();
@@ -147,7 +177,25 @@ MainWindow::MainWindow(QWidget *parent)
     }
     player->setVolume(volume);
     musicFileDir.mkpath(musicFileDir.absolutePath());
+
+    Music currentSong = Music::fromJson(settings.value("music/currentSong").toJsonObject());
+    if (currentSong.isValid())
+    {
+        startPlaySong(currentSong);// 还原位置
+
+        qint64 playPosition = settings.value("music/playPosition", 0).toLongLong();
+        if (playPosition)
+        {
+            setPlayPositionAfterLoad = playPosition;
+            slotPlayerPositionChanged();
+        }
+
+        // 不自动播放
+        player->play();
+    }
+    settings.setValue("music/playPosition", 0);
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -159,10 +207,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
 }
 
-void MainWindow::initUI()
-{
 
-}
 
 void MainWindow::initSqlite()
 {
@@ -170,10 +215,7 @@ void MainWindow::initSqlite()
 }
 
 
-void MainWindow::initMenuAction()
-{
 
-}
 
 void MainWindow::initSystemTrayIcon()
 {
@@ -282,7 +324,7 @@ void MainWindow::downloadSong(Music music)
                    player->stop();
                 }
                 saveSongList("music/order", orderSongs);
-                setPlayListTable(orderSongs);
+                setPlayListTable(orderSongs, ui->MusicTable);
                 playNext();
             }
             downloadingSong = Music();
@@ -467,7 +509,7 @@ void MainWindow::startPlaySong(Music music)
     if (!orderSongs.contains(music))
     orderSongs.append(music);
     saveSongList("music/order", orderSongs);
-    setPlayListTable(orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
 }
 
 void MainWindow::playNext()
@@ -485,7 +527,7 @@ void MainWindow::playNext()
 
     orderSongs.removeFirst();
     saveSongList("music/order", orderSongs);
-    setPlayListTable(orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
 
     if (!orderSongs.size())
     {
@@ -499,7 +541,7 @@ void MainWindow::playNext()
 
     Music music = orderSongs.first();
     saveSongList("music/order", orderSongs);
-    setPlayListTable(orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
 
     startPlaySong(music);
     emit signalOrderSongPlayed(music);
@@ -524,7 +566,7 @@ void MainWindow::appendOrderSongs(SongList musics)
          startPlaySong(orderSongs.first());
      }
      saveSongList("music/order", orderSongs);
-     setPlayListTable(orderSongs);
+     setPlayListTable(orderSongs, ui->MusicTable);
      downloadNext();
 }
 
@@ -545,7 +587,7 @@ void MainWindow::removeOrderSongs(SongList musics)
     }
     playNext();
     saveSongList("music/order", orderSongs);
-    setPlayListTable(orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
 
 }
 /**
@@ -568,7 +610,7 @@ void MainWindow::appendNextSongs(SongList musics)
         startPlaySong(orderSongs.first());
     }
     saveSongList("music/order", orderSongs);
-    setPlayListTable(orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
     downloadNext();
 }
 
@@ -719,9 +761,9 @@ void MainWindow::setSearchResultTable(SongList songs)
     });
 }
 
-void MainWindow::setPlayListTable(SongList songs)
+void MainWindow::setPlayListTable(SongList songs, QTableWidget *table)
 {
-    QTableWidget* table = ui->MusicTable;
+//    QTableWidget* table = ui->MusicTable;
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 //    table->horizontalHeader()->setStretchLastSection(true); //设置充满表宽度
     table->clear();
@@ -1088,7 +1130,7 @@ void MainWindow::on_searchResultTable_customContextMenuRequested(const QPoint &)
 
 void MainWindow::on_play_list_button_clicked()
 {
-    setPlayListTable(orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
     ui->stackedWidget->setCurrentWidget(ui->Musicpage);
 }
 
@@ -1162,7 +1204,7 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
 
 void MainWindow::on_local_music_button_clicked()
 {
-    setPlayListTable(localSongs);
+    setPlayListTable(localSongs, ui->localMusicTable);
     ui->stackedWidget->setCurrentWidget(ui->localMusicpage);
 }
 
@@ -1242,7 +1284,7 @@ void MainWindow::on_searchResultTable_itemDoubleClicked(QTableWidgetItem *item)
     if (orderSongs.contains(currentsong))
     {
         orderSongs.removeOne(currentsong);
-        setPlayListTable(orderSongs);
+        setPlayListTable(orderSongs, ui->MusicTable);
     }
     else
         orderSongs.insert(0, currentsong);
@@ -1271,7 +1313,7 @@ void MainWindow::on_play_button_clicked()
     if (player->state() == QMediaPlayer::PlayingState)
     {
         player->pause();
-        ui->play_button->setIcon(QIcon(":/icon/pause"));
+//        ui->play_button->setIcon(QIcon(":/icon/play"));
     }
     else
     {
@@ -1281,7 +1323,7 @@ void MainWindow::on_play_button_clicked()
             return ;
         }
         player->play();
-        ui->play_button->setIcon(QIcon(":icon/play"));
+//        ui->play_button->setIcon(QIcon(":icon/pause"));
     }
 }
 
@@ -1299,4 +1341,11 @@ void MainWindow::on_sound_button_clicked()
 
     vc->exec();
     vc->deleteLater();
+}
+
+void MainWindow::slotPlayerPositionChanged()
+{
+   qint64 position = player->position();
+   ui->playProgressSlider->setSliderPosition(static_cast<int>(position));
+   update();
 }

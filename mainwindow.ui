@@ -348,7 +348,7 @@ border:none;
 }</string>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="searchResultPage">
          <property name="styleSheet">
@@ -480,6 +480,9 @@ QTableView QTableCornerButton::section
             </property>
             <property name="alternatingRowColors">
              <bool>true</bool>
+            </property>
+            <property name="showGrid">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -644,12 +647,12 @@ QTableView QTableCornerButton::section
       <item>
        <widget class="QLabel" name="now_duration">
         <property name="text">
-         <string>11:11</string>
+         <string>00:00</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="horizontalSlider">
+       <widget class="QSlider" name="playProgressSlider">
         <property name="styleSheet">
          <string notr="true">QSlider::groove:horizontal {
  
