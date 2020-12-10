@@ -153,6 +153,7 @@ private:
     QMediaPlaylist *playlist;        // 播放列表
     QSystemTrayIcon *mySystemTray;   // 系统托盘
     QList<MusicList *> musicList;    // 歌单
+    PlayCirecleMode circleMode = OrderList;
 
     SongList searchResultSongs;
     PlayListList searchResultPlayLists;

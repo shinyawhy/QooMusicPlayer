@@ -515,7 +515,24 @@ void MainWindow::startPlaySong(Music music)
 void MainWindow::playNext()
 {
     // 播放列表结束 随机播放我的喜欢里的歌
-    if (!orderSongs.size())
+//    if (!orderSongs.size())
+//    {
+//        if(!favoriteSongs.size())
+//            return ;
+
+//        int r = qrand() % favoriteSongs.size();
+//        startPlaySong(favoriteSongs.at(r));
+//        return ;
+//    }
+
+//    orderSongs.removeFirst();
+//    saveSongList("music/order", orderSongs);
+//    setPlayListTable(orderSongs, ui->MusicTable);
+    qDebug()<<"111";
+    int index = orderSongs.indexOf(playingSong);
+        qDebug()<<index;
+    // 最后一首
+    if (index == orderSongs.size() - 1)
     {
         if(!favoriteSongs.size())
             return ;
@@ -524,22 +541,16 @@ void MainWindow::playNext()
         startPlaySong(favoriteSongs.at(r));
         return ;
     }
-
-    orderSongs.removeFirst();
-    saveSongList("music/order", orderSongs);
-    setPlayListTable(orderSongs, ui->MusicTable);
-
-    if (!orderSongs.size())
+    // 歌单里不存在这首歌(放的时候被删了之类的。。
+    if(index == -1)
     {
-        if(!favoriteSongs.size())
-            return ;
-
-        int r = qrand() % favoriteSongs.size();
-        startPlaySong(favoriteSongs.at(r));
+        player->stop();
         return ;
     }
 
-    Music music = orderSongs.first();
+//    Music music = orderSongs.first();
+    Music music = orderSongs.at(index+1);
+ qDebug()<<"index";
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
 
@@ -574,7 +585,7 @@ void MainWindow::removeOrderSongs(SongList musics)
 {
     foreach (Music music, musics)
     {
-//        orderSongs.removeOne(music);
+        orderSongs.removeOne(music);
         if (playingSong == music)
         {
             settings.setValue("music/currentSong", "");
@@ -600,7 +611,13 @@ void MainWindow::appendNextSongs(SongList musics)
     {
         if (orderSongs.contains(music))
             orderSongs.removeOne(music);
-        orderSongs.insert(0, music);
+        // 随机播放
+        if (circleMode == RandomList)
+        {
+
+        }
+        int index = orderSongs.indexOf(playingSong);
+        orderSongs.insert(index + 1, music);
         addDownloadSong(music);
     }
 
@@ -1296,7 +1313,7 @@ void MainWindow::SlotSongPlayEnd()
     emit signalSongPlayFinished(playingSong);
 
     //清除播放
-    playingSong = Music();
+//    playingSong = Music();
     settings.setValue("music/currentSong", "");
     ui->playingNameLabel->clear();
     ui->playingArtistLabel->clear();
