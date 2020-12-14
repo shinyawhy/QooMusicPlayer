@@ -972,6 +972,20 @@ void MainWindow::mouseDoubleClickEvent(QMouseEvent *)
         on_max_button_clicked();
     }
 }
+
+void MainWindow::showEvent(QShowEvent *)
+{
+   restoreGeometry(settings.value("qoomusicwindow/geometry").toByteArray());
+   restoreState(settings.value("qoomusicwindow/state").toByteArray());
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    settings.setValue("music/currentSong",playingSong.toJson());
+    settings.setValue("qoomusicwindow/state", this->saveState());
+    settings.setValue("qoomusicwindow/geometry", this->saveGeometry());
+    settings.setValue("music/playPosition", player->position());
+}
 /**
  * 重写窗体缩放， 仅在Windows环境下有效
  */

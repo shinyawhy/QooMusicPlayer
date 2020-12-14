@@ -190,6 +190,9 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
+    void showEvent(QShowEvent*) override;
+    void closeEvent(QCloseEvent*) override;
+
 //    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 
     QPoint mousePosition;
