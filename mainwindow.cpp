@@ -546,10 +546,10 @@ void MainWindow::playNext()
         }
         else
         {
-        int r = qrand() % orderSongs.size();
-        if (r != index)
-        startPlaySong(orderSongs.at(r));
-        return ;
+           int r = qrand() % orderSongs.size();
+           if (r != index)
+           startPlaySong(orderSongs.at(r));
+           return ;
         }
     }
 
@@ -622,6 +622,9 @@ void MainWindow::removeOrderSongs(SongList musics)
             player->stop();
             // 下一首歌，没有就不放
         }
+
+        if (circleMode == RandomList)
+            onMusicAppendRandom--;
     }
     playNext();
     saveSongList("music/order", orderSongs);
