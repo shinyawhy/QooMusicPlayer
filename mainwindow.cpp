@@ -153,8 +153,10 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
-
-
+    // 生成真正的随机数
+    QTime time;
+    time= QTime::currentTime();
+    qsrand(time.msec()+time.second()*1000);
 
     // 读取数据
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
@@ -165,7 +167,7 @@ MainWindow::MainWindow(QWidget *parent)
 //        startPlaySong(orderSongs.first());
 //    }
 
-
+    // 音量
     int volume = settings.value("music/volume", 50).toInt();
     bool mute = settings.value("music/mute", false).toBool();
     if (mute)
@@ -178,6 +180,7 @@ MainWindow::MainWindow(QWidget *parent)
     player->setVolume(volume);
     musicFileDir.mkpath(musicFileDir.absolutePath());
 
+    // 进度条
     Music currentSong = Music::fromJson(settings.value("music/currentSong").toJsonObject());
     qDebug()<<currentSong.simpleString();
     if (currentSong.isValid())
@@ -195,6 +198,16 @@ MainWindow::MainWindow(QWidget *parent)
         player->play();
     }
     settings.setValue("music/playPosition", 0);
+
+    // 播放模式
+    circleMode = static_cast<PlayCirecleMode>(settings.value("music/mode", 0).toInt());
+    if (circleMode == OrderList)
+        ui->mode_button->setIcon(QIcon(":icon/list_circle"));
+    else if (circleMode == SingleList)
+        ui->mode_button->setIcon(QIcon(":icon/single_circle"));
+    else
+        ui->mode_button->setIcon(QIcon(":icon/random"));
+
 }
 
 
@@ -515,33 +528,48 @@ void MainWindow::startPlaySong(Music music)
 
 void MainWindow::playNext()
 {
-    // 播放列表结束 随机播放我的喜欢里的歌
-//    if (!orderSongs.size())
-//    {
-//        if(!favoriteSongs.size())
-//            return ;
-
-//        int r = qrand() % favoriteSongs.size();
-//        startPlaySong(favoriteSongs.at(r));
-//        return ;
-//    }
-
-//    orderSongs.removeFirst();
-//    saveSongList("music/order", orderSongs);
-//    setPlayListTable(orderSongs, ui->MusicTable);
 
     int index = orderSongs.indexOf(playingSong);
-    qDebug()<<index;
+
+    qDebug()<<"歌单index："<<index;
+
+    if (circleMode == RandomList)
+    {
+        if (!orderSongs.size())
+            return ;
+        // 添加了下一首播放
+        if (onMusicAppendRandom)
+        {
+           int index = orderSongs.indexOf(playingSong);
+           startPlaySong(orderSongs.at(index + 1));
+           onMusicAppendRandom--;
+           return ;
+        }
+        else
+        {
+        int r = qrand() % orderSongs.size();
+        startPlaySong(orderSongs.at(r));
+        return ;
+        }
+    }
+
     // 最后一首
     if (index == orderSongs.size() - 1)
     {
-        if(!favoriteSongs.size())
+        /*    // 播放列表结束 随机播放我的喜欢里的歌
+        if(!localSongs.size())
             return ;
 
-        int r = qrand() % favoriteSongs.size();
-        startPlaySong(favoriteSongs.at(r));
+        int r = qrand() % localSongs.size();
+        startPlaySong(localSongs.at(r));
+        return ;*/
+        // 跳到开头播放
+        startPlaySong(orderSongs.first());
+        index = orderSongs.indexOf(playingSong);
         return ;
+
     }
+
     // 歌单里不存在这首歌(放的时候被删了之类的。。
     if(index == -1)
     {
@@ -549,7 +577,7 @@ void MainWindow::playNext()
         return ;
     }
 
-//    Music music = orderSongs.first();
+    // Music music = orderSongs.first();
     Music music = orderSongs.at(index+1);
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
@@ -613,7 +641,7 @@ void MainWindow::appendNextSongs(SongList musics)
         // 随机播放
         if (circleMode == RandomList)
         {
-
+            onMusicAppendRandom++;
         }
         int index = orderSongs.indexOf(playingSong);
         orderSongs.insert(index + 1, music);
@@ -1328,14 +1356,34 @@ void MainWindow::SlotSongPlayEnd()
 
     //清除播放
 //    playingSong = Music();
+    if (circleMode == OrderList)
+    {
     int index = orderSongs.indexOf(playingSong);
-    Music music = orderSongs.at(index + 1);
+    Music music = orderSongs.at(index);
     settings.setValue("music/currentSong",music.toJson());
     ui->playingNameLabel->clear();
     ui->playingArtistLabel->clear();
     ui->playingCoverLablel->clear();
 
     playNext();
+    }
+    else if (circleMode == SingleList)
+    {
+        // 不用管，会自己放下去
+        player->setPosition(0);
+        player->play();
+    }
+    else if (circleMode == RandomList)
+    {
+        int index = orderSongs.indexOf(playingSong);
+        Music music = orderSongs.at(index);
+        settings.setValue("music/currentSong",music.toJson());
+        ui->playingNameLabel->clear();
+        ui->playingArtistLabel->clear();
+        ui->playingCoverLablel->clear();
+
+        playNext();
+    }
 }
 
 /**
@@ -1407,4 +1455,9 @@ void MainWindow::on_mode_button_clicked()
         ui->mode_button->setIcon(QIcon(":/icon/list_circle"));
     }
     settings.setValue("music/mode", circleMode);
+}
+
+void MainWindow::on_forward_button_clicked()
+{
+   SlotSongPlayEnd();
 }

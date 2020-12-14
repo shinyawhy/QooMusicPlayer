@@ -102,6 +102,8 @@ private slots:
 
     void on_mode_button_clicked();
 
+    void on_forward_button_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -177,6 +179,7 @@ private:
     QString msecondToString(qint64 msecond);
     void activeSong(Music music);
     bool isNotPlaying() const;
+    int onMusicAppendRandom = 0;
     
     QSettings settings;
     QDir musicFileDir;   // 用于程序识别
