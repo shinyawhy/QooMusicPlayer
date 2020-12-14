@@ -540,7 +540,6 @@ void MainWindow::playNext()
         // 添加了下一首播放
         if (onMusicAppendRandom)
         {
-           int index = orderSongs.indexOf(playingSong);
            startPlaySong(orderSongs.at(index + 1));
            onMusicAppendRandom--;
            return ;
@@ -548,6 +547,7 @@ void MainWindow::playNext()
         else
         {
         int r = qrand() % orderSongs.size();
+        if (r != index)
         startPlaySong(orderSongs.at(r));
         return ;
         }
@@ -556,7 +556,7 @@ void MainWindow::playNext()
     // 最后一首
     if (index == orderSongs.size() - 1)
     {
-        /*    // 播放列表结束 随机播放我的喜欢里的歌
+        /*    // 播放列表结束 随机播放我的喜欢里的歌 留着做心动模式叭
         if(!localSongs.size())
             return ;
 
