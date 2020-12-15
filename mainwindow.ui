@@ -29,6 +29,21 @@
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,2,0,0,0,0,0,0">
       <item>
        <widget class="QPushButton" name="logo_button">
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>180</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -67,8 +82,7 @@
         </property>
         <property name="styleSheet">
          <string notr="true">QWidget{
-border-radius:5px;
-background-color: rgb(204, 204, 204);
+	border-radius:5px;
 	background-color: rgb(221, 221, 221);
 }</string>
         </property>
@@ -97,10 +111,11 @@ border:none;
          </item>
          <item>
           <widget class="QPushButton" name="search_button">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
            <property name="styleSheet">
-            <string notr="true">QPushButton{
-background-color:transparent;
-}</string>
+            <string notr="true"/>
            </property>
            <property name="text">
             <string/>
@@ -132,6 +147,9 @@ background-color:transparent;
       </item>
       <item>
        <widget class="QPushButton" name="menu_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -149,6 +167,9 @@ background-color:transparent;
       </item>
       <item>
        <widget class="QPushButton" name="min_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -166,6 +187,9 @@ background-color:transparent;
       </item>
       <item>
        <widget class="QPushButton" name="normal_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -183,6 +207,9 @@ background-color:transparent;
       </item>
       <item>
        <widget class="QPushButton" name="max_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -200,6 +227,9 @@ background-color:transparent;
       </item>
       <item>
        <widget class="QPushButton" name="close_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -218,17 +248,32 @@ background-color:transparent;
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,3">
+     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
       <property name="topMargin">
        <number>0</number>
       </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMinimumSize</enum>
+        </property>
         <property name="leftMargin">
          <number>0</number>
         </property>
         <item>
          <widget class="QPushButton" name="play_list_button">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -246,6 +291,15 @@ background-color:transparent;
         </item>
         <item>
          <widget class="QPushButton" name="local_music_button">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -263,6 +317,15 @@ background-color:transparent;
         </item>
         <item>
          <widget class="QPushButton" name="my_favorite_button">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -280,6 +343,15 @@ background-color:transparent;
         </item>
         <item>
          <widget class="QPushButton" name="recommond_music_button">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -297,6 +369,15 @@ background-color:transparent;
         </item>
         <item>
          <widget class="QPushButton" name="my_song_list_button">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -314,6 +395,12 @@ background-color:transparent;
         </item>
         <item>
          <widget class="QListWidget" name="MusiclistWidget">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
           <property name="styleSheet">
            <string notr="true">QListWidget{
 background-color:transparent;
@@ -324,6 +411,15 @@ border:none;
         </item>
         <item>
          <widget class="QPushButton" name="pushButton">
+          <property name="maximumSize">
+           <size>
+            <width>180</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
           <property name="text">
            <string>新建歌单</string>
           </property>
@@ -595,6 +691,9 @@ QTableView QTableCornerButton::section
       </item>
       <item>
        <widget class="QPushButton" name="back_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -612,6 +711,9 @@ QTableView QTableCornerButton::section
       </item>
       <item>
        <widget class="QPushButton" name="play_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -629,6 +731,9 @@ QTableView QTableCornerButton::section
       </item>
       <item>
        <widget class="QPushButton" name="forward_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -681,6 +786,9 @@ QSlider::sub-page:horizontal{background-color:rgb(26,217,110);}</string>
       </item>
       <item>
        <widget class="QPushButton" name="lyric_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -698,6 +806,9 @@ QSlider::sub-page:horizontal{background-color:rgb(26,217,110);}</string>
       </item>
       <item>
        <widget class="QPushButton" name="sound_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -715,6 +826,9 @@ QSlider::sub-page:horizontal{background-color:rgb(26,217,110);}</string>
       </item>
       <item>
        <widget class="QPushButton" name="mode_button">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>

@@ -7,7 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
     settings(QApplication::applicationDirPath() + "/musics.ini", QSettings::Format::IniFormat),
     musicFileDir(QApplication::applicationDirPath() + "/musics"),
     downloadedMusicFileDir(QApplication::applicationDirPath() + "/downloaded"),
-    player(new QMediaPlayer(this))
+    player(new QMediaPlayer(this)),
+    expandPlayingButton(new QPushButton(this))
 {
     ui->setupUi(this);
 
@@ -152,6 +153,18 @@ MainWindow::MainWindow(QWidget *parent)
             setPlayPositionAfterLoad = 0;
         }
     });
+
+    connect(expandPlayingButton, SIGNAL(clicked()), this, SLOT(slotExpandPlayingButtonClicked()));
+    expandPlayingButton->setFlat(true);
+    expandPlayingButton->setFocusPolicy(Qt::NoFocus);
+    QString expandPlayingButtonSS(
+                "QPushButton"
+                "{"
+                "   border: none; "
+                "focus{padding: -1;}"
+                "}");
+    expandPlayingButton->setStyleSheet(expandPlayingButtonSS);
+    expandPlayingButton->show();
 
     // 生成真正的随机数
     QTime time;
@@ -671,6 +684,14 @@ void MainWindow::setCurrentLyric(QString lyric)
 
 }
 
+void MainWindow::adjustExpandPlayingButton()
+{
+    QRect rect(ui->playingCoverLablel->mapTo(this, QPoint(0, 0)),
+               QSize((ui->playingCoverLablel->width() + ui->playingNameLabel->width()),ui->playingCoverLablel->height()));
+    expandPlayingButton->setGeometry(rect);
+    expandPlayingButton->raise();
+}
+
 void MainWindow::addFavorite(SongList musics)
 {
     foreach (Music music, musics)
@@ -1008,6 +1029,8 @@ void MainWindow::showEvent(QShowEvent *)
 {
    restoreGeometry(settings.value("qoomusicwindow/geometry").toByteArray());
    restoreState(settings.value("qoomusicwindow/state").toByteArray());
+
+   adjustExpandPlayingButton();
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -1016,6 +1039,11 @@ void MainWindow::closeEvent(QCloseEvent *)
     settings.setValue("qoomusicwindow/state", this->saveState());
     settings.setValue("qoomusicwindow/geometry", this->saveGeometry());
     settings.setValue("music/playPosition", player->position());
+}
+
+void MainWindow::resizeEvent(QResizeEvent *)
+{
+    adjustExpandPlayingButton();
 }
 /**
  * 重写窗体缩放， 仅在Windows环境下有效
@@ -1116,7 +1144,7 @@ void MainWindow::on_searchResultTable_itemActivated(QTableWidgetItem *item)
     }
     else if (searchResultPlayLists.size())
     {
-
+        // todo:搜索歌单
     }
 }
 
@@ -1462,5 +1490,10 @@ void MainWindow::on_mode_button_clicked()
 
 void MainWindow::on_forward_button_clicked()
 {
-   SlotSongPlayEnd();
+    SlotSongPlayEnd();
+}
+
+void MainWindow::slotExpandPlayingButtonClicked()
+{
+
 }

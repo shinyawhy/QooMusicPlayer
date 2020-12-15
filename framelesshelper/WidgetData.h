@@ -20,6 +20,8 @@ public:
     // 更新橡皮筋状态
     void updateRubberBandStatus();
 
+    void setadjust(void(*adjust)(void));
+
 private:
     // 更新鼠标样式
     void updateCursorShape(const QPoint &gMousePos);
@@ -38,6 +40,7 @@ private:
     // 处理鼠标进入
     void handleHoverMoveEvent(QHoverEvent *event);
 
+
 private:
     FramelessHelperPrivate *d;
     QRubberBand *m_pRubberBand;
@@ -49,4 +52,5 @@ private:
     bool m_bCursorShapeChanged;
     bool m_bLeftButtonTitlePressed;
     Qt::WindowFlags m_windowFlags;
+    void *adjust(void);
 };

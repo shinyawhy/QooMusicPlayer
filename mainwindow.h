@@ -104,6 +104,8 @@ private slots:
 
     void on_forward_button_clicked();
 
+    void slotExpandPlayingButtonClicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -140,6 +142,7 @@ private:
 
     void setCurrentCover(const QPixmap& pixmap);
     void setCurrentLyric(QString lyric);
+    void adjustExpandPlayingButton();
 
     void addFavorite(SongList musics);
     void removeFavorite(SongList musics);
@@ -186,6 +189,8 @@ private:
     QDir downloadedMusicFileDir; // 已下载的歌曲资源
     const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
+    QPushButton* expandPlayingButton;
+
 protected:
     // 重新实现拖动操作
     virtual void mouseMoveEvent(QMouseEvent *event) override;
@@ -195,6 +200,7 @@ protected:
 
     void showEvent(QShowEvent*) override;
     void closeEvent(QCloseEvent*) override;
+    void resizeEvent(QResizeEvent*) override;
 
 //    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 
