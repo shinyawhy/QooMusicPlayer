@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    color_octree/coloroctree.cpp \
     framelesshelper/CursorPosCalculator.cpp \
     framelesshelper/WidgetData.cpp \
     framelesshelper/frameless_helper.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     LyricStreamWidget.h \
+    color_octree/coloroctree.h \
     framelesshelper/CursorPosCalculator.h \
     framelesshelper/FramelessHelperPrivate.h \
     framelesshelper/WidgetData.h \

@@ -73,11 +73,6 @@ void WidgetData::updateRubberBandStatus()
     }
 }
 
-void WidgetData::setadjust(void (*adjust)())
-{
-//    this->adjust()  == adjust;
-}
-
 void WidgetData::updateCursorShape(const QPoint &gMousePos)
 {
     if (m_pWidget->isFullScreen() || m_pWidget->isMaximized())

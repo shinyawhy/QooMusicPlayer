@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QEvent>
 #include <QRubberBand>
+
+typedef void (*adjust)(void);
 class FramelessHelperPrivate;
 class QRubberBand;
 class WidgetData
@@ -19,8 +21,6 @@ public:
     void handleWidgetEvent(QEvent *event);
     // 更新橡皮筋状态
     void updateRubberBandStatus();
-
-    void setadjust(void(*adjust)(void));
 
 private:
     // 更新鼠标样式
@@ -52,5 +52,4 @@ private:
     bool m_bCursorShapeChanged;
     bool m_bLeftButtonTitlePressed;
     Qt::WindowFlags m_windowFlags;
-    void *adjust(void);
 };

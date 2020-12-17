@@ -171,14 +171,14 @@ MainWindow::MainWindow(QWidget *parent)
     time= QTime::currentTime();
     qsrand(time.msec()+time.second()*1000);
 
+    themeColor = settings.value("music/themeColor", themeColor).toBool();
+    blurBg = settings.value("music/blurBg", blurBg).toBool();
+    blurAlpha = settings.value("music/blurAlpha", blurAlpha).toInt();
+
     // 读取数据
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
     restoreSongList("music/order", orderSongs);
     restoreSongList("music/local", localSongs);
-//    if(orderSongs.size())
-//    {
-//        startPlaySong(orderSongs.first());
-//    }
 
     // 音量
     int volume = settings.value("music/volume", 50).toInt();
@@ -228,13 +228,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-void MainWindow::paintEvent(QPaintEvent *event)
-{
-
-}
-
-
 
 void MainWindow::initSqlite()
 {
@@ -677,6 +670,10 @@ void MainWindow::appendNextSongs(SongList musics)
 void MainWindow::setCurrentCover(const QPixmap &pixmap)
 {
     currentCover = pixmap;
+    if(blurBg)
+        setBlurBackground(currentCover);
+
+
 }
 
 void MainWindow::setCurrentLyric(QString lyric)
@@ -690,6 +687,88 @@ void MainWindow::adjustExpandPlayingButton()
                QSize((ui->playingCoverLablel->width() + ui->playingNameLabel->width()),ui->playingCoverLablel->height()));
     expandPlayingButton->setGeometry(rect);
     expandPlayingButton->raise();
+}
+
+void MainWindow::setBlurBackground(const QPixmap &bg)
+{
+   if (bg.isNull())
+       return ;
+
+   // 当前图片变为上一张图
+   prevBgAlpha = currentBgAlpha;
+   prevBlurBg = currentBlurBg;
+
+   // 开始模糊
+   const int radius = qMax(20, qMin(width(), height()) / 5);
+   QPixmap pixmap = bg;
+   pixmap = pixmap.scaled(this->width() + radius* 2, this->height() + radius * 2,
+                          Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+   QImage img = pixmap.toImage();
+   QPainter painter(&pixmap);
+   qt_blurImage(&painter, img, radius, true, false);
+
+   // 裁剪边缘
+   int c = qMin(bg.width(), bg.height());
+   c = qMin(c / 2, radius);
+   QPixmap clip = pixmap.copy(c, c, pixmap.width() - c * 2, pixmap.height() - c * 2);
+
+   // 抽样获取背景， 设置透明度
+   qint64 rgbSum = 0;
+   QImage image = clip.toImage();
+   int w = image.width(), h = image.height();
+   const int m = 16;
+   for (int y = 0; y < m; y++)
+   {
+       for (int x = 0; x < m; x++)
+       {
+           QColor c = image.pixelColor(w * x / m, h * x / m);
+           rgbSum += c.red() + c.green() +c.blue();
+       }
+   }
+   int addin = rgbSum * blurAlpha / (255 * 3 * m * m);
+   // 半透明
+   currentBlurBg = clip;
+   currentBgAlpha = qMin(255, blurAlpha +addin);
+
+   // 出现动画
+   QPropertyAnimation* ani1 = new QPropertyAnimation(this, "appearBgProg");
+   ani1->setStartValue(0);
+   ani1->setEndValue(currentBgAlpha);
+   ani1->setDuration(1000);
+   ani1->setEasingCurve(QEasingCurve::OutCubic);
+   connect(ani1, &QPropertyAnimation::valueChanged, this, [=](const QVariant& val){
+      update();
+   });
+
+   connect(ani1, &QPropertyAnimation::finished, this, [=]{
+      ani1->deleteLater();
+   });
+   currentBgAlpha = 0;
+   ani1->start();
+
+   // 消失动画
+   QPropertyAnimation* ani2 = new QPropertyAnimation(this, "disappearBgProg");
+   ani2->setStartValue(prevBgAlpha);
+   ani2->setEndValue(0);
+   ani2->setDuration(1000);
+   ani2->setEasingCurve(QEasingCurve::OutCubic);
+   connect(ani2, &QPropertyAnimation::valueChanged, this, [=](const QVariant& val){
+       prevBgAlpha = val.toInt();
+       update();
+   });
+   connect(ani2, &QPropertyAnimation::finished, this, [=]{
+       prevBlurBg = QPixmap();
+       ani2->deleteLater();
+       update();
+   });
+   ani2->start();
+}
+
+void MainWindow::setThemeColor(const QPixmap &cover)
+{
+    QColor bg, fg, sbg, sfg;
+
+
 }
 
 void MainWindow::addFavorite(SongList musics)
@@ -733,6 +812,26 @@ void MainWindow::restoreSongList(QString key, SongList &songs)
     QJsonArray array = settings.value(key).toJsonArray();
     foreach(QJsonValue val, array)
         songs.append(Music::fromJson(val.toObject()));
+}
+
+void MainWindow::setAppearBgProg(int x)
+{
+    this->currentBgAlpha = x;
+}
+
+void MainWindow::setDisappearBgProg(int x)
+{
+    this->prevBgAlpha = x;
+}
+
+int MainWindow::getAppearBgProg() const
+{
+    return this->currentBgAlpha;
+}
+
+int MainWindow::getDisappearBgProg() const
+{
+    return this->prevBgAlpha;
 }
 
 void MainWindow::searchMusic(QString key)
@@ -1044,6 +1143,26 @@ void MainWindow::closeEvent(QCloseEvent *)
 void MainWindow::resizeEvent(QResizeEvent *)
 {
     adjustExpandPlayingButton();
+}
+
+void MainWindow::paintEvent(QPaintEvent *e)
+{
+    QMainWindow::paintEvent(e);
+
+    if (blurBg)
+    {
+        QPainter painter(this);
+        if (!currentBlurBg.isNull())
+        {
+            painter.setOpacity((double)currentBgAlpha / 255);
+            painter.drawPixmap(rect(), currentBlurBg);
+        }
+        if (!prevBlurBg.isNull() && prevBgAlpha)
+        {
+            painter.setOpacity((double)prevBgAlpha / 255);
+            painter.drawPixmap(rect(), prevBlurBg);
+        }
+    }
 }
 /**
  * 重写窗体缩放， 仅在Windows环境下有效
@@ -1495,5 +1614,13 @@ void MainWindow::on_forward_button_clicked()
 
 void MainWindow::slotExpandPlayingButtonClicked()
 {
+    // 隐藏歌词
+    if (ui->stackedWidget->currentWidget() == ui->lyricsPage)
+    {
 
+    }
+    else // 显示歌词
+    {
+        ui->stackedWidget->setCurrentWidget(ui->lyricsPage);
+    }
 }
