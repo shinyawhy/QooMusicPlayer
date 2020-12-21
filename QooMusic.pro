@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     color_octree/coloroctree.cpp \
+    color_octree/imageutil.cpp \
     framelesshelper/CursorPosCalculator.cpp \
     framelesshelper/WidgetData.cpp \
     framelesshelper/frameless_helper.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
 HEADERS += \
     LyricStreamWidget.h \
     color_octree/coloroctree.h \
+    color_octree/imageutil.h \
     framelesshelper/CursorPosCalculator.h \
     framelesshelper/FramelessHelperPrivate.h \
     framelesshelper/WidgetData.h \
