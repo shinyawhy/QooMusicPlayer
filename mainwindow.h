@@ -36,6 +36,8 @@
 #include "volumecontrol.h"
 #include "frameless_helper.h"
 #include "imageutil.h"
+#include "lyricstreamwidget.h"
+
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>

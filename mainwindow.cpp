@@ -680,7 +680,7 @@ void MainWindow::setCurrentCover(const QPixmap &pixmap)
 
 void MainWindow::setCurrentLyric(QString lyric)
 {
-
+    ui->lyricWidget->setLyric(lyric);
 }
 
 void MainWindow::adjustExpandPlayingButton()
@@ -1065,6 +1065,29 @@ void MainWindow::playLocalSong(Music music)
         downloadSongCover(music);
     }
 
+    // 设置
+    if (QFileInfo(lyricPath(music)).exists())
+    {
+        QFile file(lyricPath(music));
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        QTextStream stream(&file);
+        QString lyric;
+        QString line;
+        while (!stream.atEnd())
+        {
+            line = stream.readLine();
+            lyric.append(line + "\n");
+        }
+
+        file.close();
+
+        setCurrentLyric(lyric);
+    }
+    else
+    {
+        setCurrentLyric("");
+        downloadSongLyric(music);
+    }
     // 开始播放
     playingSong = music;
     player->setMedia(QUrl::fromLocalFile(songPath(music)));
@@ -1664,10 +1687,50 @@ void MainWindow::slotExpandPlayingButtonClicked()
     // 隐藏歌词
     if (ui->stackedWidget->currentWidget() == ui->lyricsPage)
     {
-
+        QRect rect(ui->stackedWidget->mapTo(this, QPoint(5, 0)), ui->stackedWidget->size() - QSize(5, 0));
+        QPixmap pixmap(rect.size());
+        render(&pixmap, QPoint(0, 0), rect);
+        QLabel* label = new QLabel(this);
+        label->setScaledContents(true);
+        label->setGeometry(rect);
+        label->setPixmap(pixmap);
+        QPropertyAnimation* ani = new QPropertyAnimation(label, "geometry");
+        ani->setStartValue(rect);
+        ani->setEndValue(QRect(ui->playingCoverLablel->geometry().center(), QSize(1, 1)));
+        ani->setEasingCurve(QEasingCurve::InOutCubic);
+        ani->setDuration(300);
+        connect(ani, &QPropertyAnimation::finished, this, [=]{
+            ani->deleteLater();
+            label->deleteLater();
+        });
+        label->show();
+        ani->start();
+        ui->stackedWidget->setCurrentWidget(ui->searchResultPage);
+        settings.setValue("music/lyricStream", false);
     }
     else // 显示歌词
     {
         ui->stackedWidget->setCurrentWidget(ui->lyricsPage);
+        QRect rect(ui->stackedWidget->mapTo(this, QPoint(5, 0)), ui->stackedWidget->size()-QSize(5, 0));
+        QPixmap pixmap(rect.size());
+        render(&pixmap, QPoint(0, 0), rect);
+        QLabel* label = new QLabel(this);
+        label->setScaledContents(true);
+        label->setGeometry(rect);
+        label->setPixmap(pixmap);
+        QPropertyAnimation* ani = new QPropertyAnimation(label, "geometry");
+        ani->setStartValue(QRect(ui->playingCoverLablel->geometry().center(), QSize(1,1)));
+        ani->setEndValue(rect);
+        ani->setDuration(300);
+        ani->setEasingCurve(QEasingCurve::InOutCubic);
+        ui->stackedWidget->setCurrentWidget(ui->searchResultPage);
+        connect(ani, &QPropertyAnimation::finished, this, [=]{
+            ui->stackedWidget->setCurrentWidget(ui->lyricsPage);
+            ani->deleteLater();
+            label->deleteLater();
+        });
+        label->show();
+        ani->start();
+        settings.setValue("music/lyricStream", true);
     }
 }

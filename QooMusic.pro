@@ -22,10 +22,10 @@ INCLUDEPATH += color_octree/ \
 SOURCES += \
     color_octree/coloroctree.cpp \
     color_octree/imageutil.cpp \
+    desktoplyricwidget.cpp \
     framelesshelper/CursorPosCalculator.cpp \
     framelesshelper/WidgetData.cpp \
     framelesshelper/frameless_helper.cpp \
-    lyricstreamwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     music.cpp \
@@ -33,9 +33,9 @@ SOURCES += \
     volumecontrol.cpp
 
 HEADERS += \
-    LyricStreamWidget.h \
     color_octree/coloroctree.h \
     color_octree/imageutil.h \
+    desktoplyricwidget.h \
     framelesshelper/CursorPosCalculator.h \
     framelesshelper/FramelessHelperPrivate.h \
     framelesshelper/WidgetData.h \
