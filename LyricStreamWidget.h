@@ -1,11 +1,11 @@
 #ifndef LYRICSTREAMWIDGET_H
 #define LYRICSTREAMWIDGET_H
 
-#include <QWidget>
-#include <QPainter>
 
-class LyricStreamWidget : public QWidget
+class LyricStreamWidget
 {
-    Q_OBJECT
+public:
+    LyricStreamWidget();
 };
+
 #endif // LYRICSTREAMWIDGET_H

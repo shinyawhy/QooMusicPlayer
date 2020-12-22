@@ -16,12 +16,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += color_octree/ \
+               framelesshelper/
+
 SOURCES += \
     color_octree/coloroctree.cpp \
     color_octree/imageutil.cpp \
     framelesshelper/CursorPosCalculator.cpp \
     framelesshelper/WidgetData.cpp \
     framelesshelper/frameless_helper.cpp \
+    lyricstreamwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     music.cpp \
@@ -36,6 +40,7 @@ HEADERS += \
     framelesshelper/FramelessHelperPrivate.h \
     framelesshelper/WidgetData.h \
     framelesshelper/frameless_helper.h \
+    lyricstreamwidget.h \
     mainwindow.h \
     musicbeans.h \
     musiclist.h \

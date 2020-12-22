@@ -25,5 +25,6 @@
         <file alias="lyric">icon/lryic.png</file>
         <file alias="mute">icon/mute.png</file>
         <file alias="add">icon/plus.png</file>
+        <file alias="tray">icon/systemTray.png</file>
     </qresource>
 </RCC>

@@ -34,7 +34,8 @@
 #include <QSlider>
 #include "musiclist.h"
 #include "volumecontrol.h"
-#include "framelesshelper/frameless_helper.h"
+#include "frameless_helper.h"
+#include "imageutil.h"
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -55,7 +56,7 @@ class MainWindow : public QMainWindow
 //    Q_PROPERTY(int lyricScroll READ getLyricScroll WRITE setLyricScroll)
     Q_PROPERTY(int disappearBgProg READ getDisappearBgProg WRITE setDisappearBgProg)
     Q_PROPERTY(int appearBgProg READ getAppearBgProg WRITE setAppearBgProg)
-//    Q_PROPERTY(double paletteProg READ getPaletteBgProg WRITE setPaletteBgProg)
+    Q_PROPERTY(double paletteProg READ getPaletteBgProg WRITE setPaletteBgProg)
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -224,8 +225,10 @@ private:
 private:
     void setAppearBgProg(int x);
     void setDisappearBgProg(int x);
+    void setPaletteBgProg(double x);
     int getAppearBgProg() const;
     int getDisappearBgProg() const;
+    double getPaletteBgProg() const;
 
 
 

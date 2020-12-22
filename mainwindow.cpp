@@ -670,7 +670,9 @@ void MainWindow::appendNextSongs(SongList musics)
 void MainWindow::setCurrentCover(const QPixmap &pixmap)
 {
     currentCover = pixmap;
-    if(blurBg)
+    if (themeColor)
+        setThemeColor(currentCover);
+    if (blurBg)
         setBlurBackground(currentCover);
 
 
@@ -767,8 +769,43 @@ void MainWindow::setBlurBackground(const QPixmap &bg)
 void MainWindow::setThemeColor(const QPixmap &cover)
 {
     QColor bg, fg, sbg, sfg;
+    auto colors = ImageUtil::extractImageThemeColors(cover.toImage(), 7);
+    ImageUtil::getBgFgSgColor(colors, &bg, &fg, &sbg, &sfg);
 
+    prevPa = BFSColor::fromPalette(palette());
+    currentPa = BFSColor(QList<QColor>{bg, fg, sbg, sfg});
 
+    QPropertyAnimation* ani = new QPropertyAnimation(this, "paletteProg");
+    ani->setStartValue(0);
+    ani->setEndValue(1.0);
+    ani->setDuration(500);
+    connect(ani, &QPropertyAnimation::valueChanged, this, [=](const QVariant& val){
+        double d = val.toDouble();
+        BFSColor bfs = prevPa + (currentPa - prevPa) * d;
+        QColor bg, fg, sbg, sfg;
+        bfs.toColors(&bg, &fg, &sbg, &sfg);
+
+        QPalette pa;
+        pa.setColor(QPalette::Window, bg);
+        pa.setColor(QPalette::Background, bg);
+        pa.setColor(QPalette::Button, bg);
+
+        pa.setColor(QPalette::Foreground, fg);
+        pa.setColor(QPalette::Text, fg);
+        pa.setColor(QPalette::ButtonText, fg);
+        pa.setColor(QPalette::WindowText, fg);
+        pa.setColor(QPalette::HighlightedText, fg);
+
+        pa.setColor(QPalette::Highlight, sbg);
+
+        QApplication::setPalette(pa);
+        setPalette(pa);
+
+        ui->playingNameLabel->setPalette(pa);
+        ui->logo_button->setPalette(pa);
+    });
+    connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+    ani->start();
 }
 
 void MainWindow::addFavorite(SongList musics)
@@ -824,6 +861,11 @@ void MainWindow::setDisappearBgProg(int x)
     this->prevBgAlpha = x;
 }
 
+void MainWindow::setPaletteBgProg(double x)
+{
+    this->paletteAlpha = x;
+}
+
 int MainWindow::getAppearBgProg() const
 {
     return this->currentBgAlpha;
@@ -832,6 +874,11 @@ int MainWindow::getAppearBgProg() const
 int MainWindow::getDisappearBgProg() const
 {
     return this->prevBgAlpha;
+}
+
+double MainWindow::getPaletteBgProg() const
+{
+   return paletteAlpha;
 }
 
 void MainWindow::searchMusic(QString key)
