@@ -1191,10 +1191,12 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
     return QMainWindow::mouseReleaseEvent(event);
 }
 
-void MainWindow::mouseDoubleClickEvent(QMouseEvent *)
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    mousePosition = event->pos();
     if(mousePosition.y() <= (ui->widget_3->pos().y() + ui->widget_3->geometry().bottom()))
     {
+        qDebug()<<"position"<<mousePosition.y();
         if(windowState() == Qt::WindowMaximized)
         {
         on_normal_button_clicked();

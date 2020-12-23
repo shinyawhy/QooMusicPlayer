@@ -300,12 +300,21 @@ private slots:
        });
        for (int i = 8; i < 30; i++)
        {
-            fontMenu->addAction(QString::number(i), [=]{
+            QAction* fm = new QAction(QString::number(i), this);
+            fontMenu->addAction(fm);
+            if(pointSize == i)
+            {
+                fm->setCheckable(true);
+                fm->setChecked(true);
+            }
+            connect(fm, &QAction::triggered, [=]{
                 pointSize = i;
                 settings.setValue("lyric/pointSize", pointSize);
                 updateFixedHeight();
                 update();
             });
+
+
        }
 
        timeMenu->addAction("加快5秒",[=]{adjustLyricTime(0, -5000);});
@@ -314,6 +323,13 @@ private slots:
        timeMenu->addAction("减慢1秒",[=]{adjustLyricTime(0, +1000);});
        timeMenu->addAction("减慢2秒",[=]{adjustLyricTime(0, +2000);});
        timeMenu->addAction("减慢5秒",[=]{adjustLyricTime(0, +5000);});
+
+       menu->exec(cursor().pos());
+
+       QList<QAction*> list = menu->actions();
+       foreach(QAction* action, list)
+           delete action;
+       delete menu;
     }
 
 private:
