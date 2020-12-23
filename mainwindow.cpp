@@ -866,6 +866,16 @@ void MainWindow::setPaletteBgProg(double x)
     this->paletteAlpha = x;
 }
 
+void MainWindow::setLyricScroll(int x)
+{
+    this->lyricScroll = x;
+}
+
+int MainWindow::getLyricScroll() const
+{
+    return this->lyricScroll;
+}
+
 int MainWindow::getAppearBgProg() const
 {
     return this->currentBgAlpha;
@@ -1647,6 +1657,18 @@ void MainWindow::on_sound_button_clicked()
 void MainWindow::slotPlayerPositionChanged()
 {
    qint64 position = player->position();
+   if (ui->lyricWidget->setPosition(position))
+   {
+       QPropertyAnimation* ani = new QPropertyAnimation(this, "lyricScroll");
+       ani->setStartValue(ui->scrollArea->verticalScrollBar()->sliderPosition());
+       ani->setEndValue(qMax(0, ui->lyricWidget->getCurrentTop() - this->height() / 2));
+       ani->setDuration(200);
+       connect(ani, &QPropertyAnimation::valueChanged, this, [=]{
+           ui->scrollArea->verticalScrollBar()->setSliderPosition(lyricScroll);
+       });
+       connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+       ani->start();
+   }
    ui->playProgressSlider->setSliderPosition(static_cast<int>(position));
    update();
 }

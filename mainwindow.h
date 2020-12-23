@@ -55,7 +55,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-//    Q_PROPERTY(int lyricScroll READ getLyricScroll WRITE setLyricScroll)
+    Q_PROPERTY(int lyricScroll READ getLyricScroll WRITE setLyricScroll)
     Q_PROPERTY(int disappearBgProg READ getDisappearBgProg WRITE setDisappearBgProg)
     Q_PROPERTY(int appearBgProg READ getAppearBgProg WRITE setAppearBgProg)
     Q_PROPERTY(double paletteProg READ getPaletteBgProg WRITE setPaletteBgProg)
@@ -178,6 +178,7 @@ private slots:
 
     void slotExpandPlayingButtonClicked();
 
+
 private:
     Ui::MainWindow *ui;
 
@@ -228,6 +229,8 @@ private:
     void setAppearBgProg(int x);
     void setDisappearBgProg(int x);
     void setPaletteBgProg(double x);
+    void setLyricScroll(int x);
+    int getLyricScroll() const;
     int getAppearBgProg() const;
     int getDisappearBgProg() const;
     double getPaletteBgProg() const;
@@ -260,6 +263,7 @@ private:
     void activeSong(Music music);
     bool isNotPlaying() const;
     int onMusicAppendRandom = 0;
+    int lyricScroll;
     
     QSettings settings;
     QDir musicFileDir;   // 用于程序识别
