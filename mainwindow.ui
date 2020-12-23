@@ -198,7 +198,7 @@ border:none;
         </property>
         <property name="icon">
          <iconset resource="icon.qrc">
-          <normaloff>:/icon/normal</normaloff>:/icon/normal</iconset>
+          <normaloff>:/icon/min2</normaloff>:/icon/min2</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

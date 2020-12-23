@@ -30,6 +30,7 @@ SOURCES += \
     mainwindow.cpp \
     music.cpp \
     musiclist.cpp \
+    mymenu.cpp \
     volumecontrol.cpp
 
 HEADERS += \
@@ -44,6 +45,7 @@ HEADERS += \
     mainwindow.h \
     musicbeans.h \
     musiclist.h \
+    mymenu.h \
     volumecontrol.h
 
 FORMS += \

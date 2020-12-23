@@ -26,5 +26,7 @@
         <file alias="mute">icon/mute.png</file>
         <file alias="add">icon/plus.png</file>
         <file alias="tray">icon/systemTray.png</file>
+        <file alias="exit">icon/exit.png</file>
+        <file alias="min2">icon/min2.png</file>
     </qresource>
 </RCC>

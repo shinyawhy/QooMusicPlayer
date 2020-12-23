@@ -37,6 +37,7 @@
 #include "frameless_helper.h"
 #include "imageutil.h"
 #include "lyricstreamwidget.h"
+#include "mymenu.h"
 
 
 #ifdef Q_OS_WIN
@@ -178,6 +179,8 @@ private slots:
 
     void slotExpandPlayingButtonClicked();
 
+    void on_back_button_clicked();
+
 
 private:
     Ui::MainWindow *ui;
@@ -185,6 +188,8 @@ private:
     // 初始化
     void initSqlite();          // 初始化sql数据库
     void initSystemTrayIcon();  // 初始化系统托盘
+
+    void systemTrayIcon_actived(QSystemTrayIcon::ActivationReason reason);
     
     QString songPath(const Music &music) const;
     QString lyricPath(const Music &music) const;
@@ -244,6 +249,7 @@ private:
     QSystemTrayIcon *mySystemTray;   // 系统托盘
     QList<MusicList *> musicList;    // 歌单
     PlayCirecleMode circleMode = OrderList;
+    QAction *action_systemTray_playmode;
 
     SongList searchResultSongs;
     PlayListList searchResultPlayLists;

@@ -8,13 +8,11 @@ MainWindow::MainWindow(QWidget *parent)
     musicFileDir(QApplication::applicationDirPath() + "/musics"),
     downloadedMusicFileDir(QApplication::applicationDirPath() + "/downloaded"),
     player(new QMediaPlayer(this)),
-    expandPlayingButton(new QPushButton(this))
+    expandPlayingButton(new QPushButton(this)),
+    mySystemTray(new QSystemTrayIcon(this)),
+    action_systemTray_playmode(new QAction(this))
 {
     ui->setupUi(this);
-
-
-    // 数据库初始化
-    initSqlite();
 
     player->setNotifyInterval(100);
 
@@ -117,6 +115,39 @@ MainWindow::MainWindow(QWidget *parent)
     ui->MusicTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->MusicTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
 
+    // 系统托盘
+    mySystemTray->setIcon(QIcon(":/icon/tray"));
+
+    MyMenu *ContextMenu = new MyMenu(this);
+    mySystemTray->setContextMenu(ContextMenu);
+
+    QAction *action_systemTray_pre = new QAction(QIcon(":/icon/back"), "上一首");
+    QAction *action_systemTray_next = new QAction(QIcon(":/icon/forward"), "下一首");
+    QAction *action_systemTray_play = new QAction(QIcon(":/icon/pause"),"暂停");
+    QAction *action_systemTray_exit = new QAction(QIcon(":/icon/exit"), "退出");
+    action_systemTray_playmode->setIcon(QIcon(":/icon/list_circle"));
+    action_systemTray_playmode->setText("列表循环");
+
+
+
+    connect(mySystemTray, &QSystemTrayIcon::activated, this, &MainWindow::systemTrayIcon_actived);
+    connect(action_systemTray_pre, &QAction::triggered, this, &MainWindow::on_back_button_clicked);
+    connect(action_systemTray_next, &QAction::triggered, this, &MainWindow::on_forward_button_clicked);
+    connect(action_systemTray_play, &QAction::triggered, this, &MainWindow::on_play_button_clicked);
+    connect(action_systemTray_playmode, &QAction::triggered, this, &MainWindow::on_mode_button_clicked);
+    connect(action_systemTray_exit, &QAction::triggered, this, &MainWindow::on_close_button_clicked);
+
+
+    ContextMenu->addSeparator();
+    ContextMenu->addAction(action_systemTray_pre);
+    ContextMenu->addAction(action_systemTray_next);
+    ContextMenu->addAction(action_systemTray_play);
+    ContextMenu->addAction(action_systemTray_playmode);
+    ContextMenu->addSeparator();
+    ContextMenu->addAction(action_systemTray_exit);
+
+    mySystemTray->show();
+
     connect(player, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status){
         if (status == QMediaPlayer::EndOfMedia)
         {
@@ -127,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent)
             qDebug() << "无效媒体：" << playingSong.simpleString();
             playNext();
         }
+
     });
 
     connect(player, &QMediaPlayer::positionChanged, this, [=](qint64 position){
@@ -138,11 +170,41 @@ MainWindow::MainWindow(QWidget *parent)
         if (state == QMediaPlayer::PlayingState)
         {
             ui->play_button->setIcon(QIcon(":/icon/pause"));
+            action_systemTray_play->setIcon(QIcon(":/icon/pause"));
+            action_systemTray_play->setText("暂停");
+
         }
         else
         {
             ui->play_button->setIcon(QIcon(":/icon/play"));
+            action_systemTray_play->setIcon(QIcon(":/icon/play"));
+            action_systemTray_play->setText("播放");
         }
+    });
+
+    connect(action_systemTray_playmode, &QAction::triggered, this, [=]{
+        if (circleMode == OrderList)
+        {
+            circleMode = SingleList;
+            ui->mode_button->setIcon(QIcon(":/icon/single_circle"));
+            action_systemTray_playmode->setIcon(QIcon(":/icon/single_circle"));
+            action_systemTray_playmode->setText("单曲循环");
+        }
+        else if (circleMode == SingleList)
+        {
+            circleMode = RandomList;
+            ui->mode_button->setIcon(QIcon(":icon/random"));
+            action_systemTray_playmode->setIcon(QIcon(":/icon/random"));
+            action_systemTray_playmode->setText("随机播放");
+        }
+        else
+        {
+            circleMode = OrderList;
+            ui->mode_button->setIcon(QIcon(":/icon/list_circle"));
+            action_systemTray_playmode->setIcon(QIcon(":/icon/list_circle"));
+            action_systemTray_playmode->setText("顺序播放");
+        }
+        settings.setValue("music/mode", circleMode);
     });
 
     connect(player, &QMediaPlayer::durationChanged, this, [=](qint64 duration){
@@ -215,12 +277,27 @@ MainWindow::MainWindow(QWidget *parent)
     // 播放模式
     circleMode = static_cast<PlayCirecleMode>(settings.value("music/mode", 0).toInt());
     if (circleMode == OrderList)
+    {
         ui->mode_button->setIcon(QIcon(":icon/list_circle"));
+        action_systemTray_playmode->setIcon(QIcon(":/icon/list_circle"));
+        action_systemTray_playmode->setText("顺序播放");
+    }
     else if (circleMode == SingleList)
+    {
         ui->mode_button->setIcon(QIcon(":icon/single_circle"));
+        action_systemTray_playmode->setIcon(QIcon(":/icon/single_circle"));
+        action_systemTray_playmode->setText("单曲循环");
+    }
     else
+    {
         ui->mode_button->setIcon(QIcon(":icon/random"));
+        action_systemTray_playmode->setIcon(QIcon(":/icon/random"));
+        action_systemTray_playmode->setText("随机播放");
+    }
+    // 数据库初始化
+    initSqlite();
 
+    initSystemTrayIcon();
 }
 
 
@@ -239,7 +316,25 @@ void MainWindow::initSqlite()
 
 void MainWindow::initSystemTrayIcon()
 {
-    
+
+}
+
+void MainWindow::systemTrayIcon_actived(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::DoubleClick:
+        if (isHidden())
+        {
+            show();
+        }
+        else
+        {
+            hide();
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 QString MainWindow::songPath(const Music &music) const
@@ -1042,6 +1137,7 @@ void MainWindow::setPlayListTable(SongList songs, QTableWidget *table)
 void MainWindow::playLocalSong(Music music)
 {
     qDebug() << "开始播放" << music.simpleString();
+        mySystemTray->setToolTip(music.simpleString());
     if (!isSongDownloaded(music))
     {
         qDebug() << "error:未下载歌曲：" << music.simpleString() << "开始下载";
@@ -1306,22 +1402,38 @@ void MainWindow::paintEvent(QPaintEvent *e)
 void MainWindow::on_close_button_clicked()
 {
     settings.setValue("music/currentSong",playingSong.toJson());
-    close();
+//    close();
+     QCoreApplication::quit();
 }
 
 void MainWindow::on_max_button_clicked()
 {
-    setWindowState(Qt::WindowMaximized);
+    if(windowState() == Qt::WindowMaximized)
+    {
+        showNormal();
+        ui->max_button->setIcon(QIcon(":/icon/max"));
+    }
+    else
+    {
+        setWindowState(Qt::WindowMaximized);
+        ui->max_button->setIcon(QIcon(":/icon/normal"));
+    }
 }
 
 void MainWindow::on_min_button_clicked()
 {
-    setWindowState(Qt::WindowMinimized);
+    //最小化到托盘
+    if(!mySystemTray->isVisible()){
+        mySystemTray->show();
+    }
+    hide();
+//    event->ignore();
+//    setWindowState(Qt::WindowMinimized);
 }
 
 void MainWindow::on_normal_button_clicked()
 {
-    showNormal();
+    setWindowState(Qt::WindowMinimized);
 }
 
 void MainWindow::on_search_button_clicked()
@@ -1687,16 +1799,22 @@ void MainWindow::on_mode_button_clicked()
     {
         circleMode = SingleList;
         ui->mode_button->setIcon(QIcon(":/icon/single_circle"));
+        action_systemTray_playmode->setIcon(QIcon(":/icon/single_circle"));
+        action_systemTray_playmode->setText("单曲循环");
     }
     else if (circleMode == SingleList)
     {
         circleMode = RandomList;
         ui->mode_button->setIcon(QIcon(":icon/random"));
+        action_systemTray_playmode->setIcon(QIcon(":/icon/random"));
+        action_systemTray_playmode->setText("随机播放");
     }
     else
     {
         circleMode = OrderList;
         ui->mode_button->setIcon(QIcon(":/icon/list_circle"));
+        action_systemTray_playmode->setIcon(QIcon(":/icon/list_circle"));
+        action_systemTray_playmode->setText("顺序播放");
     }
     settings.setValue("music/mode", circleMode);
 }
@@ -1757,4 +1875,9 @@ void MainWindow::slotExpandPlayingButtonClicked()
         ani->start();
         settings.setValue("music/lyricStream", true);
     }
+}
+
+void MainWindow::on_back_button_clicked()
+{
+
 }
