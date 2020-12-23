@@ -22,3 +22,23 @@ void MyMenu::mouseReleaseEvent(QMouseEvent *event)
        QMenu::mouseReleaseEvent(event);
    }
 }
+
+bool MyMenu::event(QEvent *e)
+{
+    switch(e->type())
+    {
+    case QEvent::ToolTip:
+    //show action tooltip instead of widget tooltip
+    {
+    QHelpEvent* he = dynamic_cast<QHelpEvent*>(e);
+    QAction* act = actionAt(he->pos());
+    if( act )
+    {
+    QToolTip::showText(he->globalPos(), act->toolTip(), this);
+    return true;
+    }
+    }
+    break;
+    }
+    QMenu::event(e);
+}

@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     player(new QMediaPlayer(this)),
     expandPlayingButton(new QPushButton(this)),
     mySystemTray(new QSystemTrayIcon(this)),
-    action_systemTray_playmode(new QAction(this))
+    action_systemTray_playmode(new QAction(this)), music_info(new QAction(this))
 {
     ui->setupUi(this);
 
@@ -128,25 +128,12 @@ MainWindow::MainWindow(QWidget *parent)
     action_systemTray_playmode->setIcon(QIcon(":/icon/list_circle"));
     action_systemTray_playmode->setText("列表循环");
 
-
-
     connect(mySystemTray, &QSystemTrayIcon::activated, this, &MainWindow::systemTrayIcon_actived);
     connect(action_systemTray_pre, &QAction::triggered, this, &MainWindow::on_back_button_clicked);
     connect(action_systemTray_next, &QAction::triggered, this, &MainWindow::on_forward_button_clicked);
     connect(action_systemTray_play, &QAction::triggered, this, &MainWindow::on_play_button_clicked);
     connect(action_systemTray_playmode, &QAction::triggered, this, &MainWindow::on_mode_button_clicked);
     connect(action_systemTray_exit, &QAction::triggered, this, &MainWindow::on_close_button_clicked);
-
-
-    ContextMenu->addSeparator();
-    ContextMenu->addAction(action_systemTray_pre);
-    ContextMenu->addAction(action_systemTray_next);
-    ContextMenu->addAction(action_systemTray_play);
-    ContextMenu->addAction(action_systemTray_playmode);
-    ContextMenu->addSeparator();
-    ContextMenu->addAction(action_systemTray_exit);
-
-    mySystemTray->show();
 
     connect(player, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status){
         if (status == QMediaPlayer::EndOfMedia)
@@ -297,7 +284,16 @@ MainWindow::MainWindow(QWidget *parent)
     // 数据库初始化
     initSqlite();
 
-    initSystemTrayIcon();
+    ContextMenu->addAction(music_info);
+    ContextMenu->addSeparator();
+    ContextMenu->addAction(action_systemTray_pre);
+    ContextMenu->addAction(action_systemTray_next);
+    ContextMenu->addAction(action_systemTray_play);
+    ContextMenu->addAction(action_systemTray_playmode);
+    ContextMenu->addSeparator();
+    ContextMenu->addAction(action_systemTray_exit);
+
+    mySystemTray->show();
 }
 
 
@@ -307,14 +303,6 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::initSqlite()
-{
-
-}
-
-
-
-
-void MainWindow::initSystemTrayIcon()
 {
 
 }
@@ -1137,7 +1125,16 @@ void MainWindow::setPlayListTable(SongList songs, QTableWidget *table)
 void MainWindow::playLocalSong(Music music)
 {
     qDebug() << "开始播放" << music.simpleString();
-        mySystemTray->setToolTip(music.simpleString());
+    mySystemTray->setToolTip(music.simpleString());
+    QString mi = music.simpleString();
+    if (mi.length() > 6)
+    {
+        mi = mi.left(5) + "...";
+        music_info->setText(mi);
+        music_info->setToolTip(music.simpleString());
+    }
+    else
+        music_info->setText(mi);
     if (!isSongDownloaded(music))
     {
         qDebug() << "error:未下载歌曲：" << music.simpleString() << "开始下载";

@@ -181,13 +181,11 @@ private slots:
 
     void on_back_button_clicked();
 
-
 private:
     Ui::MainWindow *ui;
 
     // 初始化
     void initSqlite();          // 初始化sql数据库
-    void initSystemTrayIcon();  // 初始化系统托盘
 
     void systemTrayIcon_actived(QSystemTrayIcon::ActivationReason reason);
     
@@ -250,6 +248,7 @@ private:
     QList<MusicList *> musicList;    // 歌单
     PlayCirecleMode circleMode = OrderList;
     QAction *action_systemTray_playmode;
+    QAction *music_info;
 
     SongList searchResultSongs;
     PlayListList searchResultPlayLists;
