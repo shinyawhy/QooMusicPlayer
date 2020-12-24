@@ -1878,3 +1878,12 @@ void MainWindow::on_back_button_clicked()
 {
 
 }
+
+void MainWindow::on_MusicTable_itemDoubleClicked(QTableWidgetItem *item)
+{
+    int row = ui->MusicTable->row(item);
+    Music currentsong;
+    if (row > -1)
+        currentsong = orderSongs.at(row);
+    startPlaySong(currentsong);
+}

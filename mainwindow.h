@@ -181,6 +181,8 @@ private slots:
 
     void on_back_button_clicked();
 
+    void on_MusicTable_itemDoubleClicked(QTableWidgetItem *item);
+
 private:
     Ui::MainWindow *ui;
 
