@@ -37,6 +37,7 @@
 #include "frameless_helper.h"
 #include "imageutil.h"
 #include "lyricstreamwidget.h"
+#include "desktoplyricwidget.h"
 #include "mymenu.h"
 
 
@@ -183,6 +184,10 @@ private slots:
 
     void on_MusicTable_itemDoubleClicked(QTableWidgetItem *item);
 
+    void on_lyric_button_clicked();
+
+    void adjustCurrentLyricTime(QString lyric);
+
 private:
     Ui::MainWindow *ui;
 
@@ -221,6 +226,7 @@ private:
     void adjustExpandPlayingButton();
     void setBlurBackground(const QPixmap& bg);
     void setThemeColor(const QPixmap& cover);
+    void connectDesktopLyricSignals();
 
     void addFavorite(SongList musics);
     void removeFavorite(SongList musics);
@@ -278,6 +284,7 @@ private:
     const QString API_DOMAIN = "http://iwxyi.com:3000/";
 
     QPushButton* expandPlayingButton;
+    DesktopLyricWidget* desktopLyric;
 
     bool blurBg = true;
     int blurAlpha = 32;

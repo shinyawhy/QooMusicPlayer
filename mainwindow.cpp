@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     player(new QMediaPlayer(this)),
     expandPlayingButton(new QPushButton(this)),
     mySystemTray(new QSystemTrayIcon(this)),
+    desktopLyric(new DesktopLyricWidget()),
     action_systemTray_playmode(new QAction(this)), music_info(new QAction(this))
 {
     ui->setupUi(this);
@@ -215,6 +216,12 @@ MainWindow::MainWindow(QWidget *parent)
     expandPlayingButton->setStyleSheet(expandPlayingButtonSS);
     expandPlayingButton->show();
 
+    connect(ui->lyricWidget, SIGNAL(signalAdjustLyricTime(QString)), this, SLOT(adjustCurrentLyricTime(QString)));
+
+    bool lyricStack = settings.value("music/lyricStream", false).toBool();
+    if (lyricStack)
+        ui->stackedWidget->setCurrentWidget(ui->lyricsPage);
+
     // 生成真正的随机数
     QTime time;
     time= QTime::currentTime();
@@ -281,6 +288,22 @@ MainWindow::MainWindow(QWidget *parent)
         action_systemTray_playmode->setIcon(QIcon(":/icon/random"));
         action_systemTray_playmode->setText("随机播放");
     }
+
+    connectDesktopLyricSignals();
+
+    bool showDeskTopLyric = settings.value("music/desktopLyric", false).toBool();
+
+    if (showDeskTopLyric)
+    {
+        desktopLyric->show();
+        ui->lyric_button->setIcon(QIcon(":/icon/lyric"));
+    }
+    else
+    {
+        desktopLyric->hide();
+        ui->lyric_button->setIcon(QIcon(":/icon/hide"));
+    }
+
     // 数据库初始化
     initSqlite();
 
@@ -300,6 +323,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    desktopLyric->deleteLater();
 }
 
 void MainWindow::initSqlite()
@@ -314,6 +338,10 @@ void MainWindow::systemTrayIcon_actived(QSystemTrayIcon::ActivationReason reason
         if (isHidden())
         {
             show();
+            if (windowState() == Qt::MinimumSize)
+            {
+                showNormal();
+            }
         }
         else
         {
@@ -763,6 +791,7 @@ void MainWindow::setCurrentCover(const QPixmap &pixmap)
 
 void MainWindow::setCurrentLyric(QString lyric)
 {
+    desktopLyric->setLyric(lyric);
     ui->lyricWidget->setLyric(lyric);
 }
 
@@ -772,6 +801,22 @@ void MainWindow::adjustExpandPlayingButton()
                QSize((ui->playingCoverLablel->width() + ui->playingNameLabel->width()),ui->playingCoverLablel->height()));
     expandPlayingButton->setGeometry(rect);
     expandPlayingButton->raise();
+}
+
+void MainWindow::adjustCurrentLyricTime(QString lyric)
+{
+    if (!playingSong.isValid())
+        return;
+
+    QFile file(lyricPath(playingSong));
+    file.open(QIODevice::WriteOnly);
+    QTextStream stream(&file);
+    stream << lyric;
+    file.flush();
+    file.close();
+
+    desktopLyric->setLyric(lyric);
+    desktopLyric->setPosition(player->position());
 }
 
 void MainWindow::setBlurBackground(const QPixmap &bg)
@@ -884,11 +929,50 @@ void MainWindow::setThemeColor(const QPixmap &cover)
         QApplication::setPalette(pa);
         setPalette(pa);
 
+        ui->lyricWidget->setColors(sfg, fg);
+        desktopLyric->setColors(sfg, fg);
         ui->playingNameLabel->setPalette(pa);
         ui->logo_button->setPalette(pa);
     });
     connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
     ani->start();
+}
+
+void MainWindow::connectDesktopLyricSignals()
+{
+    connect(desktopLyric, &DesktopLyricWidget::signalhide, this, [=]{
+        ui->lyric_button->setIcon(QIcon(":/icon/hide"));
+        settings.setValue("music/desktopLyric", false);
+    });
+    connect(desktopLyric, &DesktopLyricWidget::signalSWitchTrans, this, [=]{
+        desktopLyric->close();
+        desktopLyric->deleteLater();
+        desktopLyric = new DesktopLyricWidget(nullptr);
+        connectDesktopLyricSignals();
+        desktopLyric->show();
+
+        if (playingSong.isValid())
+        {
+            Music song = playingSong;
+            if (QFileInfo(lyricPath(song)).exists())
+            {
+                QFile file(lyricPath(song));
+                file.open(QIODevice::ReadOnly | QIODevice::Text);
+                QTextStream stream(&file);
+                QString lyric;
+                QString line;
+                while (!stream.atEnd())
+                {
+                    line = stream.readLine();
+                    lyric.append(line+"\n");
+                }
+                file.close();
+
+                desktopLyric->setLyric(lyric);
+                desktopLyric->setPosition(player->position());
+            }
+        }
+    });
 }
 
 void MainWindow::addFavorite(SongList musics)
@@ -1305,6 +1389,8 @@ void MainWindow::showEvent(QShowEvent *)
    restoreState(settings.value("qoomusicwindow/state").toByteArray());
 
    adjustExpandPlayingButton();
+   if (settings.value("music/desktopLyric", false).toBool())
+       desktopLyric->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -1313,6 +1399,9 @@ void MainWindow::closeEvent(QCloseEvent *)
     settings.setValue("qoomusicwindow/state", this->saveState());
     settings.setValue("qoomusicwindow/geometry", this->saveGeometry());
     settings.setValue("music/playPosition", player->position());
+
+    if (!desktopLyric->isHidden())
+        desktopLyric->close();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *)
@@ -1768,6 +1857,8 @@ void MainWindow::on_sound_button_clicked()
 void MainWindow::slotPlayerPositionChanged()
 {
    qint64 position = player->position();
+   if (desktopLyric && !desktopLyric->isHidden())
+       desktopLyric->setPosition(position);
    if (ui->lyricWidget->setPosition(position))
    {
        QPropertyAnimation* ani = new QPropertyAnimation(this, "lyricScroll");
@@ -1886,4 +1977,20 @@ void MainWindow::on_MusicTable_itemDoubleClicked(QTableWidgetItem *item)
     if (row > -1)
         currentsong = orderSongs.at(row);
     startPlaySong(currentsong);
+}
+
+void MainWindow::on_lyric_button_clicked()
+{
+    bool showDesktopLyric = !settings.value("music/desktopLyric", false).toBool();
+    settings.setValue("music/desktopLyric", showDesktopLyric);
+    if (showDesktopLyric)
+    {
+        desktopLyric->show();
+        ui->lyric_button->setIcon(QIcon(":/icon/lyric"));
+    }
+    else
+    {
+        desktopLyric->hide();
+        ui->lyric_button->setIcon(QIcon(":/icon/hide"));
+    }
 }
