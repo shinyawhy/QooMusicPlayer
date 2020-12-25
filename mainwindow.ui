@@ -401,6 +401,9 @@ border:none;
             <height>16777215</height>
            </size>
           </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
           <property name="styleSheet">
            <string notr="true">QListWidget{
 background-color:transparent;
@@ -410,7 +413,7 @@ border:none;
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="add_list_Button">
           <property name="maximumSize">
            <size>
             <width>180</width>

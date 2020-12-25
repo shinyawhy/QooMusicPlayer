@@ -32,7 +32,11 @@
 #include <QHeaderView>
 #include <QTableWidget>
 #include <QSlider>
-#include "musiclist.h"
+#include <QList>
+#include <QMediaPlaylist>
+#include <QListWidget>
+#include "musicbeans.h"
+//#include "musiclist.h"
 #include "volumecontrol.h"
 #include "frameless_helper.h"
 #include "imageutil.h"
@@ -194,6 +198,12 @@ private slots:
 
     void on_FavoriteMusicTable_itemDoubleClicked(QTableWidgetItem *item);
 
+    void on_my_song_list_button_clicked();
+
+    void on_add_list_Button_clicked();
+
+    void on_MusiclistWidget_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
 
@@ -211,6 +221,7 @@ private:
     void setSearchResultTable(SongList songs);          // 搜索结果数据到table
     void setSearchResultTable(PlayListList playLists);
     void setPlayListTable(SongList songs, QTableWidget* table);
+    void setPLAYLISTTable(PlayListList playlist, QListWidget* list);
 
     // 下载音乐
     void playLocalSong(Music music);
@@ -239,8 +250,10 @@ private:
 
     // 保存配置
     void saveSongList(QString key, const SongList &songs);
+    void savePlayList(QString key, const PlayListList &playlistlist);
     // 读取配置
     void restoreSongList(QString key, SongList &songs);
+    void restorePlayList(QString key, PlayListList &playlistlist);
 
 private:
     void setAppearBgProg(int x);
@@ -259,7 +272,7 @@ private:
     QMediaPlayer *player;            // 播放器
     QMediaPlaylist *playlist;        // 播放列表
     QSystemTrayIcon *mySystemTray;   // 系统托盘
-    QList<MusicList *> musicList;    // 歌单
+
     PlayCirecleMode circleMode = OrderList;
     QAction *action_systemTray_playmode;
     QAction *music_info;
@@ -274,6 +287,9 @@ private:
     SongList favoriteSongs;          // 我的喜欢
     SongList localSongs;             // 本地歌曲
     SongList toDownLoadSongs;        // 即将下载
+
+    PlayListList PLAYLIST;           // 歌单
+
 
     bool isSongDownFailed = false;
     qint64 setPlayPositionAfterLoad = 0; // 加载后跳转到时间

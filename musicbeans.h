@@ -140,6 +140,40 @@ struct PlayList
   QStringList tags;
   int playCount;
   PlayListCreator creator;
+
+  static PlayList fromJson(QJsonObject json)
+  {
+      PlayList playlist;
+//      music.id = JVAL_LONG(id);
+      playlist.name = JVAL_STR(name);
+//      QJsonArray array = json.value("artists").toArray(); // json中读出的artist放入一个数组
+//      QStringList artistNameList;
+//      foreach (QJsonValue val, array)
+//      {
+//         Artist artist = Artist::fromJson(val.toObject());
+//         music.artists.append(artist);
+//         artistNameList.append(artist.name);
+//      }
+
+//      music.artistNames = artistNameList.join("/");
+//      music.album = Album::fromJson(json.value("album").toObject());
+//      music.duration = JVAL_INT(duration);
+      return playlist;
+  }
+
+  QJsonObject toJson() const
+  {
+      QJsonObject json;
+//      json.insert("id", id);
+      json.insert("name", name);
+//      json.insert("duration", duration);
+//      QJsonArray array;
+//      foreach (Artist artist, artists)
+//          array.append(artist.toJson());
+//      json.insert("artists", array);
+//      json.insert("album", album.toJson());
+      return json;
+  }
 };
 
 typedef QList<Music> SongList;

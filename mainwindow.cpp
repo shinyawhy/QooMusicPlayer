@@ -116,6 +116,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->MusicTable->verticalScrollBar()->setStyleSheet(vScrollBarSS);
     ui->MusicTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
 
+
+
     // 系统托盘
     mySystemTray->setIcon(QIcon(":/icon/tray"));
 
@@ -236,6 +238,8 @@ MainWindow::MainWindow(QWidget *parent)
     restoreSongList("music/order", orderSongs);
     restoreSongList("music/local", localSongs);
     restoreSongList("music/favorite", favoriteSongs);
+    restorePlayList("playlist/list", PLAYLIST);
+    setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
 
     // 音量
     int volume = settings.value("music/volume", 50).toInt();
@@ -726,21 +730,26 @@ void MainWindow::removeOrderSongs(SongList musics)
 {
     foreach (Music music, musics)
     {
-        orderSongs.removeOne(music);
         if (playingSong == music)
         {
-            settings.setValue("music/currentSong", "");
-            ui->playingNameLabel->clear();
-            ui->playingArtistLabel->clear();
-            ui->playingCoverLablel->clear();
-            player->stop();
-            // 下一首歌，没有就不放
+            if (musics.size() == 1)
+            {
+                settings.setValue("music/currentSong", "");
+                ui->playingNameLabel->clear();
+                ui->playingArtistLabel->clear();
+                ui->playingCoverLablel->clear();
+                player->stop();
+            }
+            else
+            {
+                playNext();
+            }
         }
 
         if (circleMode == RandomList)
             onMusicAppendRandom--;
+        orderSongs.removeOne(music);
     }
-    playNext();
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
 
@@ -1010,11 +1019,28 @@ void MainWindow::saveSongList(QString key, const SongList &songs)
 
 }
 
+void MainWindow::savePlayList(QString key, const PlayListList &playlistlist)
+{
+    QJsonArray array;
+    foreach(PlayList pl, playlistlist)
+    {
+        array.append(pl.toJson());
+    }
+    settings.setValue(key, array);
+}
+
 void MainWindow::restoreSongList(QString key, SongList &songs)
 {
     QJsonArray array = settings.value(key).toJsonArray();
     foreach(QJsonValue val, array)
         songs.append(Music::fromJson(val.toObject()));
+}
+
+void MainWindow::restorePlayList(QString key, PlayListList &playlistlist)
+{
+    QJsonArray array = settings.value(key).toJsonArray();
+    foreach(QJsonValue val, array)
+        playlistlist.append(PlayList::fromJson(val.toObject()));
 }
 
 void MainWindow::setAppearBgProg(int x)
@@ -1200,6 +1226,16 @@ void MainWindow::setPlayListTable(SongList songs, QTableWidget *table)
         table->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     });
 
+}
+
+void MainWindow::setPLAYLISTTable(PlayListList playlist, QListWidget *list)
+{
+    ui->MusiclistWidget->clear();
+
+    for (int index = 0; index < playlist.size(); index++)
+    {
+        ui->MusiclistWidget->addItem(playlist.at(index).name);
+    }
 }
 
 /**
@@ -2079,4 +2115,119 @@ void MainWindow::on_FavoriteMusicTable_itemDoubleClicked(QTableWidgetItem *item)
     else
         orderSongs.insert(0, currentsong);
     startPlaySong(currentsong);
+}
+
+void MainWindow::on_my_song_list_button_clicked()
+{
+    PLAYLIST.clear();
+        savePlayList("playlist/list", PLAYLIST);
+    setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+}
+
+void MainWindow::on_add_list_Button_clicked()
+{
+    bool ok;
+    QString text =QInputDialog::getText(this, "新建歌单", "输入新歌单名字", QLineEdit::Normal, "", &ok);
+    // 判断歌名是否太长
+    if (text.length() > 10)
+    {
+      QMessageBox::warning(this, "警告:歌名太长啦！！！", "歌单名字最多十个字");
+      return ;
+    }
+    else
+    {
+        if (ok && !text.isEmpty())
+        {
+            // 歌单列表是否为空
+            if (PLAYLIST.size() == 0)
+            {
+                PlayList templist;
+                templist.name = text;
+                PLAYLIST.push_back(templist);
+            }
+            else
+            {
+                for (int i = 0; i < PLAYLIST.size(); i++)
+                {
+                    if (PLAYLIST.at(i).name == text)
+                    {
+                        QMessageBox::warning(this, "警告:歌单已存在", "歌单已存在");
+                        return ;
+                    }
+                }
+                PlayList templist;
+                templist.name = text;
+                PLAYLIST.push_back(templist);
+            }
+        }
+    }
+    savePlayList("playlist/list", PLAYLIST);
+    setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+}
+
+void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos)
+{
+    auto items = ui->MusiclistWidget->selectedItems();
+
+    QList<PlayList> playlists;
+
+    foreach (auto item, items)
+    {
+        int row = ui->MusiclistWidget->row(item);
+        playlists.append(PLAYLIST.at(row));
+    }
+    int row = ui->MusiclistWidget->currentRow();
+    PlayList currentplaylist;
+    if (row < -1)
+        currentplaylist= PLAYLIST.at(row);
+
+    QMenu *menu = new QMenu(this);
+
+    QAction *playNow = new QAction("播放歌单", this);
+    QAction *rename = new QAction("重命名", this);
+    QAction *deletePlayList = new QAction("删除歌单", this);
+
+    menu->addAction(playNow);
+    menu->addAction(rename);
+    menu->addAction(deletePlayList);
+
+    connect(rename, &QAction::triggered, [=]{
+        bool ok;
+        QString text = QInputDialog::getText(this, "重命名歌单", "请输入歌单新名字", QLineEdit::Normal, "", &ok);
+        if (text.length() > 10)
+        {
+          QMessageBox::warning(this, "警告:歌名太长啦！！！", "歌单名字最多十个字");
+          return ;
+        }
+        else
+        {
+            if (ok && !text.isEmpty())
+            {
+                for (int i = 0; i < PLAYLIST.size(); i++)
+                {
+                    if (PLAYLIST.at(i).name == text)
+                    {
+                        QMessageBox::warning(this, "警告:歌单名已存在", "请重新取名");
+                        return ;
+                    }
+                }
+                PLAYLIST[row].name = text;
+            }
+        }
+        savePlayList("playlist/list", PLAYLIST);
+        setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+    });
+
+    connect(deletePlayList, &QAction::triggered, [=]{
+
+    });
+
+    // 显示菜单
+    menu->exec(cursor().pos());
+
+    // 释放内存
+    QList<QAction*> list = menu->actions();
+    foreach(QAction* action, list)
+        delete action;
+    delete menu;
 }
