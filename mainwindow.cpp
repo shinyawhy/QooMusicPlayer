@@ -985,6 +985,7 @@ void MainWindow::addFavorite(SongList musics)
         qDebug() <<"添加收藏：" << music.simpleString();
     }
     saveSongList("music/favorite", favoriteSongs);
+    setPlayListTable(favoriteSongs, ui->FavoriteMusicTable);
 }
 
 void MainWindow::removeFavorite(SongList musics)
@@ -995,8 +996,9 @@ void MainWindow::removeFavorite(SongList musics)
         {
             qDebug() << "取消收藏：" << music.simpleString();
         }
-        saveSongList("music/favorite", favoriteSongs);
     }
+    saveSongList("music/favorite", favoriteSongs);
+    setPlayListTable(favoriteSongs, ui->FavoriteMusicTable);
 }
 
 void MainWindow::saveSongList(QString key, const SongList &songs)
@@ -1996,4 +1998,85 @@ void MainWindow::on_my_favorite_button_clicked()
 {
     setPlayListTable(favoriteSongs, ui->FavoriteMusicTable);
     ui->stackedWidget->setCurrentWidget(ui->Favoritepage);
+}
+
+void MainWindow::on_FavoriteMusicTable_customContextMenuRequested(const QPoint &pos)
+{
+    auto items = ui->FavoriteMusicTable->selectedItems();
+
+    QList<Music> musics;
+    foreach (auto item, items)
+    {
+        int row = ui->FavoriteMusicTable->row(item);
+        int col = ui->FavoriteMusicTable->column(item);
+        if (col != 0)
+            continue;
+        musics.append(favoriteSongs.at(row));
+    }
+    int row = ui->FavoriteMusicTable->currentRow();
+    Music currentsong;
+    if (row > -1)
+        currentsong = favoriteSongs.at(row);
+
+    QMenu* menu = new QMenu(this);
+
+    QAction *playNow = new QAction("立即播放", this);
+    QAction *playNext = new QAction("下一首播放", this);
+    QAction *addToPlayList = new QAction("添加到播放列表", this);
+    QAction *Favorite = new QAction("从我的喜欢中移除", this);
+//    if (favoriteSongs.contains(currentsong))
+//        Favorite->setText("从我的喜欢中移除");
+//    else
+//        Favorite->setText("添加到我的喜欢");
+
+    menu->addAction(playNow);
+    menu->addAction(playNext);
+    menu->addAction(addToPlayList);
+    menu->addAction(Favorite);
+
+    // 链接鼠标右键点击信号
+    connect(playNow, &QAction::triggered, [=]{
+        startPlaySong(currentsong);
+    });
+
+    connect(playNext, &QAction::triggered, [=]{
+       appendNextSongs(musics);
+    });
+
+    connect(addToPlayList, &QAction::triggered, [=]{
+        appendOrderSongs(musics);
+    });
+
+    connect(Favorite, &QAction::triggered, [=]{
+//        if(!favoriteSongs.contains(currentsong))
+//            addFavorite(musics);
+//        else
+            removeFavorite(musics);
+
+    });
+
+    // 显示菜单
+    menu->exec(cursor().pos());
+
+    // 释放内存
+    QList<QAction*> list = menu->actions();
+    foreach(QAction* action, list)
+        delete action;
+    delete menu;
+}
+
+void MainWindow::on_FavoriteMusicTable_itemDoubleClicked(QTableWidgetItem *item)
+{
+    int row = ui->FavoriteMusicTable->row(item);
+    Music currentsong;
+    if (row > -1 )
+        currentsong = favoriteSongs.at(row);
+    if (orderSongs.contains(currentsong))
+    {
+        orderSongs.removeOne(currentsong);
+        setPlayListTable(orderSongs, ui->MusicTable);
+    }
+    else
+        orderSongs.insert(0, currentsong);
+    startPlaySong(currentsong);
 }

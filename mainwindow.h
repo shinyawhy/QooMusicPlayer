@@ -190,6 +190,10 @@ private slots:
 
     void on_my_favorite_button_clicked();
 
+    void on_FavoriteMusicTable_customContextMenuRequested(const QPoint &pos);
+
+    void on_FavoriteMusicTable_itemDoubleClicked(QTableWidgetItem *item);
+
 private:
     Ui::MainWindow *ui;
 
