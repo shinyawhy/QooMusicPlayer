@@ -444,7 +444,7 @@ border:none;
 }</string>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="searchResultPage">
          <property name="styleSheet">
@@ -576,6 +576,48 @@ QTableView QTableCornerButton::section
             </property>
             <property name="alternatingRowColors">
              <bool>true</bool>
+            </property>
+            <property name="showGrid">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="Favoritepage">
+         <property name="styleSheet">
+          <string notr="true">QWidget{
+	
+	background-color: transparent;
+	border: none;
+}
+QTableCornerButton::section{
+	background-color: transparent;
+}</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QTableWidget" name="FavoriteMusicTable">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QTableWidget
+{
+	background: transparent;
+	border: none;
+	alternate-background-color: rgba(132, 136, 139, 20);
+}
+
+QHeaderView::section
+{
+	background-color: transparent;
+}
+
+QTableView QTableCornerButton::section
+{
+	background:transparent;
+}</string>
             </property>
             <property name="showGrid">
              <bool>false</bool>

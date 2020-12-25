@@ -188,6 +188,8 @@ private slots:
 
     void adjustCurrentLyricTime(QString lyric);
 
+    void on_my_favorite_button_clicked();
+
 private:
     Ui::MainWindow *ui;
 

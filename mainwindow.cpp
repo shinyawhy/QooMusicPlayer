@@ -235,6 +235,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
     restoreSongList("music/order", orderSongs);
     restoreSongList("music/local", localSongs);
+    restoreSongList("music/favorite", favoriteSongs);
 
     // 音量
     int volume = settings.value("music/volume", 50).toInt();
@@ -338,10 +339,6 @@ void MainWindow::systemTrayIcon_actived(QSystemTrayIcon::ActivationReason reason
         if (isHidden())
         {
             show();
-            if (windowState() == Qt::MinimumSize)
-            {
-                showNormal();
-            }
         }
         else
         {
@@ -1993,4 +1990,10 @@ void MainWindow::on_lyric_button_clicked()
         desktopLyric->hide();
         ui->lyric_button->setIcon(QIcon(":/icon/hide"));
     }
+}
+
+void MainWindow::on_my_favorite_button_clicked()
+{
+    setPlayListTable(favoriteSongs, ui->FavoriteMusicTable);
+    ui->stackedWidget->setCurrentWidget(ui->Favoritepage);
 }
