@@ -174,6 +174,11 @@ struct PlayList
 //      json.insert("album", album.toJson());
       return json;
   }
+
+  bool operator==(const PlayList& pl)
+  {
+      return this->id == pl.id;
+  }
 };
 
 typedef QList<Music> SongList;

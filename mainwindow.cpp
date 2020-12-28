@@ -730,9 +730,9 @@ void MainWindow::removeOrderSongs(SongList musics)
 {
     foreach (Music music, musics)
     {
-        if (playingSong == music)
+        if (musics.contains(playingSong))
         {
-            if (musics.size() == 1)
+            if (orderSongs.size() == 1)
             {
                 settings.setValue("music/currentSong", "");
                 ui->playingNameLabel->clear();
@@ -745,11 +745,11 @@ void MainWindow::removeOrderSongs(SongList musics)
                 playNext();
             }
         }
-
         if (circleMode == RandomList)
             onMusicAppendRandom--;
         orderSongs.removeOne(music);
     }
+
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
 
@@ -782,6 +782,19 @@ void MainWindow::appendNextSongs(SongList musics)
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
     downloadNext();
+}
+
+void MainWindow::ClearPlayList()
+{
+//    removeOrderSongs(orderSongs);
+    orderSongs.clear();
+    settings.setValue("music/currentSong", "");
+    ui->playingNameLabel->clear();
+    ui->playingArtistLabel->clear();
+    ui->playingCoverLablel->clear();
+    player->stop();
+    saveSongList("music/order", orderSongs);
+    setPlayListTable(orderSongs, ui->MusicTable);
 }
 
 void MainWindow::setCurrentCover(const QPixmap &pixmap)
@@ -1687,15 +1700,22 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
     QAction *playNext = new QAction("下一首播放", this);
     QAction *removeToPlayList = new QAction("从播放列表中移除", this);
     QAction *Favorite = new QAction("我的喜欢", this);
+    QAction *clearPlayList = new QAction("清空歌单", this);
     if (favoriteSongs.contains(currentsong))
         Favorite->setText("从我的喜欢中移除");
     else
         Favorite->setText("添加到我的喜欢");
 
+    if (!orderSongs.size())
+        clearPlayList->setEnabled(false);
+    else
+        clearPlayList->setEnabled(true);
+
     menu->addAction(playNow);
     menu->addAction(playNext);
     menu->addAction(removeToPlayList);
     menu->addAction(Favorite);
+    menu->addAction(clearPlayList);
 
     connect(playNow, &QAction::triggered, [=]{
        startPlaySong(currentsong);
@@ -1714,6 +1734,10 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
             addFavorite(musics);
         else
             removeFavorite(musics);
+    });
+
+    connect(clearPlayList, &QAction::triggered, [=]{
+        ClearPlayList();
     });
 
     // 显示菜单
@@ -1856,6 +1880,8 @@ void MainWindow::SlotSongPlayEnd()
  */
 void MainWindow::on_play_button_clicked()
 {
+    if (!orderSongs.size())
+        return ;
     if (player->state() == QMediaPlayer::PlayingState)
     {
         player->pause();
@@ -1944,6 +1970,8 @@ void MainWindow::on_mode_button_clicked()
 
 void MainWindow::on_forward_button_clicked()
 {
+    if (!orderSongs.size())
+        return ;
     SlotSongPlayEnd();
 }
 
@@ -2002,7 +2030,8 @@ void MainWindow::slotExpandPlayingButtonClicked()
 
 void MainWindow::on_back_button_clicked()
 {
-
+    if (!orderSongs.size())
+        return ;
 }
 
 void MainWindow::on_MusicTable_itemDoubleClicked(QTableWidgetItem *item)
@@ -2184,12 +2213,20 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     QMenu *menu = new QMenu(this);
 
     QAction *playNow = new QAction("播放歌单", this);
+    QAction *addToPlayList = new QAction("添加到播放列表", this);
     QAction *rename = new QAction("重命名", this);
     QAction *deletePlayList = new QAction("删除歌单", this);
 
     menu->addAction(playNow);
+    menu->addAction(addToPlayList);
     menu->addAction(rename);
     menu->addAction(deletePlayList);
+
+    connect(playNow, &QAction::triggered, [=]{
+//        orderSongs.clear();
+    });
+
+    connect(addToPlayList, &QAction::triggered, [=]{});
 
     connect(rename, &QAction::triggered, [=]{
         bool ok;
@@ -2219,7 +2256,13 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     });
 
     connect(deletePlayList, &QAction::triggered, [=]{
+        foreach(PlayList pl, playlists)
+        {
+            PLAYLIST.removeOne(pl);
+        }
 
+        savePlayList("playlist/list", PLAYLIST);
+        setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
     });
 
     // 显示菜单

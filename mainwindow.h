@@ -237,6 +237,7 @@ private:
     void appendOrderSongs(SongList musics);
     void removeOrderSongs(SongList musics);
     void appendNextSongs(SongList musics);
+    void ClearPlayList();
 
     void setCurrentCover(const QPixmap& pixmap);
     void setCurrentLyric(QString lyric);

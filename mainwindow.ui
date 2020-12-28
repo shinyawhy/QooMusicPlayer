@@ -410,6 +410,9 @@ background-color:transparent;
 border:none;
 }</string>
           </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
+          </property>
          </widget>
         </item>
         <item>
