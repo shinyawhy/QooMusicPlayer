@@ -141,6 +141,8 @@ struct PlayList
   int playCount;
   PlayListCreator creator;
 
+  QList<Music> contiansMusic;
+
   static PlayList fromJson(QJsonObject json)
   {
       PlayList playlist;

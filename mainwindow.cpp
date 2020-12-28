@@ -784,6 +784,18 @@ void MainWindow::appendNextSongs(SongList musics)
     downloadNext();
 }
 
+void MainWindow::appendMusicToPlayList(SongList musics, int row)
+{
+    foreach (Music music, musics)
+    {
+        if (PLAYLIST.at(row).contiansMusic.contains(music))
+            continue ;
+        PLAYLIST[row].contiansMusic.append(music);
+    }
+
+    savePlayList("playlist/list", PLAYLIST);
+}
+
 void MainWindow::ClearPlayList()
 {
 //    removeOrderSongs(orderSongs);
@@ -1622,16 +1634,23 @@ void MainWindow::on_searchResultTable_customContextMenuRequested(const QPoint &)
         QAction *playNext = new QAction("下一首播放", this);
         QAction *addToPlayList = new QAction("添加到播放列表", this);
         QAction *Favorite = new QAction("我的喜欢", this);
+        QMenu *PlayListMenu = new QMenu("添加到歌单", this);
         if (favoriteSongs.contains(currentsong))
             Favorite->setText("从我的喜欢中移除");
         else
             Favorite->setText("添加到我的喜欢");
+
+        if (!PLAYLIST.size())
+            PlayListMenu->setEnabled(false);
+        else
+            PlayListMenu->setEnabled(true);
 
         // QAction对象添加到菜单上
         menu->addAction(playNow);
         menu->addAction(playNext);
         menu->addAction(addToPlayList);
         menu->addAction(Favorite);
+        menu->addMenu(PlayListMenu);
 
         // 链接鼠标右键点击信号
         connect(playNow, &QAction::triggered, [=]{
@@ -1653,6 +1672,15 @@ void MainWindow::on_searchResultTable_customContextMenuRequested(const QPoint &)
                 removeFavorite(musics);
 
         });
+
+        for (int index = 0; index < PLAYLIST.size(); index++)
+        {
+            QAction* plm = new QAction(PLAYLIST.at(index).name, this);
+            PlayListMenu->addAction(plm);
+            connect(plm, &QAction::triggered, [=]{
+                appendMusicToPlayList(musics, index);
+            });
+        }
 
         // 显示菜单
         menu->exec(cursor().pos());
@@ -1700,7 +1728,8 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
     QAction *playNext = new QAction("下一首播放", this);
     QAction *removeToPlayList = new QAction("从播放列表中移除", this);
     QAction *Favorite = new QAction("我的喜欢", this);
-    QAction *clearPlayList = new QAction("清空歌单", this);
+    QAction *clearPlayList = new QAction("清空列表", this);
+    QMenu *PlayListMenu = new QMenu("添加到歌单", this);
     if (favoriteSongs.contains(currentsong))
         Favorite->setText("从我的喜欢中移除");
     else
@@ -1711,11 +1740,17 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
     else
         clearPlayList->setEnabled(true);
 
+    if (!PLAYLIST.size())
+        PlayListMenu->setEnabled(false);
+    else
+        PlayListMenu->setEnabled(true);
+
     menu->addAction(playNow);
     menu->addAction(playNext);
     menu->addAction(removeToPlayList);
     menu->addAction(Favorite);
     menu->addAction(clearPlayList);
+    menu->addMenu(PlayListMenu);
 
     connect(playNow, &QAction::triggered, [=]{
        startPlaySong(currentsong);
@@ -1739,6 +1774,15 @@ void MainWindow::on_MusicTable_customContextMenuRequested(const QPoint &)
     connect(clearPlayList, &QAction::triggered, [=]{
         ClearPlayList();
     });
+
+    for (int index = 0; index < PLAYLIST.size(); index++)
+    {
+        QAction* plm = new QAction(PLAYLIST.at(index).name, this);
+        PlayListMenu->addAction(plm);
+        connect(plm, &QAction::triggered, [=]{
+            appendMusicToPlayList(musics, index);
+        });
+    }
 
     // 显示菜单
     menu->exec(cursor().pos());
@@ -1780,15 +1824,23 @@ void MainWindow::on_localMusicTable_customContextMenuRequested(const QPoint &)
     QAction *playNext = new QAction("下一首播放", this);
     QAction *addToPlayList = new QAction("添加到播放列表", this);
     QAction *Favorite = new QAction("我的喜欢", this);
+    QMenu *PlayListMenu = new QMenu("添加到歌单", this);
+
     if (favoriteSongs.contains(currentsong))
         Favorite->setText("从我的喜欢中移除");
     else
         Favorite->setText("添加到我的喜欢");
 
+    if (!PLAYLIST.size())
+        PlayListMenu->setEnabled(false);
+    else
+        PlayListMenu->setEnabled(true);
+
     menu->addAction(playNow);
     menu->addAction(playNext);
     menu->addAction(addToPlayList);
     menu->addAction(Favorite);
+    menu->addMenu(PlayListMenu);
 
     // 链接鼠标右键点击信号
     connect(playNow, &QAction::triggered, [=]{
@@ -1811,6 +1863,14 @@ void MainWindow::on_localMusicTable_customContextMenuRequested(const QPoint &)
 
     });
 
+    for (int index = 0; index < PLAYLIST.size(); index++)
+    {
+        QAction* plm = new QAction(PLAYLIST.at(index).name, this);
+        PlayListMenu->addAction(plm);
+        connect(plm, &QAction::triggered, [=]{
+            appendMusicToPlayList(musics, index);
+        });
+    }
     // 显示菜单
     menu->exec(cursor().pos());
 
@@ -2089,6 +2149,7 @@ void MainWindow::on_FavoriteMusicTable_customContextMenuRequested(const QPoint &
     QAction *playNext = new QAction("下一首播放", this);
     QAction *addToPlayList = new QAction("添加到播放列表", this);
     QAction *Favorite = new QAction("从我的喜欢中移除", this);
+    QMenu *PlayListMenu = new QMenu("添加到歌单", this);
 //    if (favoriteSongs.contains(currentsong))
 //        Favorite->setText("从我的喜欢中移除");
 //    else
@@ -2098,6 +2159,7 @@ void MainWindow::on_FavoriteMusicTable_customContextMenuRequested(const QPoint &
     menu->addAction(playNext);
     menu->addAction(addToPlayList);
     menu->addAction(Favorite);
+    menu->addMenu(PlayListMenu);
 
     // 链接鼠标右键点击信号
     connect(playNow, &QAction::triggered, [=]{
@@ -2120,6 +2182,14 @@ void MainWindow::on_FavoriteMusicTable_customContextMenuRequested(const QPoint &
 
     });
 
+    for (int index = 0; index < PLAYLIST.size(); index++)
+    {
+        QAction* plm = new QAction(PLAYLIST.at(index).name, this);
+        PlayListMenu->addAction(plm);
+        connect(plm, &QAction::triggered, [=]{
+            appendMusicToPlayList(musics, index);
+        });
+    }
     // 显示菜单
     menu->exec(cursor().pos());
 
@@ -2223,10 +2293,22 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     menu->addAction(deletePlayList);
 
     connect(playNow, &QAction::triggered, [=]{
-//        orderSongs.clear();
+        ClearPlayList();
+        // todo: 选择歌单开始播放
+        orderSongs.append(PLAYLIST.at(row).contiansMusic);
+        startPlaySong(orderSongs.first());
+
+        saveSongList("music/order", orderSongs);
+        setPlayListTable(orderSongs, ui->MusicTable);
     });
 
-    connect(addToPlayList, &QAction::triggered, [=]{});
+    connect(addToPlayList, &QAction::triggered, [=]{
+        // 添加进播放列表
+        orderSongs.append(PLAYLIST.at(row).contiansMusic);
+
+        saveSongList("music/order", orderSongs);
+        setPlayListTable(orderSongs, ui->MusicTable);
+    });
 
     connect(rename, &QAction::triggered, [=]{
         bool ok;

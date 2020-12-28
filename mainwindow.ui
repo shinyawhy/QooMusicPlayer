@@ -466,6 +466,9 @@ QTableCornerButton::section{
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QTableWidget" name="searchResultTable">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>
@@ -514,6 +517,9 @@ QTableCornerButton::section{
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
            <widget class="QTableWidget" name="MusicTable">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>
@@ -559,6 +565,9 @@ QTableCornerButton::section{
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QTableWidget" name="localMusicTable">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>
@@ -604,6 +613,9 @@ QTableCornerButton::section{
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <widget class="QTableWidget" name="FavoriteMusicTable">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>

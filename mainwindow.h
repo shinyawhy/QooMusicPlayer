@@ -237,6 +237,7 @@ private:
     void appendOrderSongs(SongList musics);
     void removeOrderSongs(SongList musics);
     void appendNextSongs(SongList musics);
+    void appendMusicToPlayList(SongList musics, int row);
     void ClearPlayList();
 
     void setCurrentCover(const QPixmap& pixmap);
@@ -290,6 +291,7 @@ private:
     SongList toDownLoadSongs;        // 即将下载
 
     PlayListList PLAYLIST;           // 歌单
+
 
 
     bool isSongDownFailed = false;
