@@ -2268,13 +2268,6 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
 {
     auto items = ui->MusiclistWidget->selectedItems();
 
-    QList<PlayList> playlists;
-
-    foreach (auto item, items)
-    {
-        int row = ui->MusiclistWidget->row(item);
-        playlists.append(PLAYLIST.at(row));
-    }
     int row = ui->MusiclistWidget->currentRow();
     PlayList currentplaylist;
     if (row < -1)
@@ -2294,8 +2287,15 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
 
     connect(playNow, &QAction::triggered, [=]{
         ClearPlayList();
-        // todo: 选择歌单开始播放
-        orderSongs.append(PLAYLIST.at(row).contiansMusic);
+        // 选择歌单开始播放
+        QList<PlayList> playlists;
+
+        foreach (auto item, items)
+        {
+            int row = ui->MusiclistWidget->row(item);
+            playlists.append(PLAYLIST.at(row));
+        }
+        orderSongs.append(playlists.at(row).contiansMusic);
         startPlaySong(orderSongs.first());
 
         saveSongList("music/order", orderSongs);
@@ -2304,7 +2304,20 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
 
     connect(addToPlayList, &QAction::triggered, [=]{
         // 添加进播放列表
-        orderSongs.append(PLAYLIST.at(row).contiansMusic);
+        QList<PlayList> playlists;
+
+        foreach (auto item, items)
+        {
+            int row = ui->MusiclistWidget->row(item);
+            playlists.append(PLAYLIST.at(row));
+        }
+
+        foreach(Music music, playlists[row].contiansMusic)
+        {
+            if (orderSongs.contains(music))
+                playlists[row].contiansMusic.removeOne(music);
+        }
+        orderSongs.append(playlists.at(row).contiansMusic);
 
         saveSongList("music/order", orderSongs);
         setPlayListTable(orderSongs, ui->MusicTable);
@@ -2338,6 +2351,14 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     });
 
     connect(deletePlayList, &QAction::triggered, [=]{
+        QList<PlayList> playlists;
+
+        foreach (auto item, items)
+        {
+            int row = ui->MusiclistWidget->row(item);
+            playlists.append(PLAYLIST.at(row));
+        }
+
         foreach(PlayList pl, playlists)
         {
             PLAYLIST.removeOne(pl);
