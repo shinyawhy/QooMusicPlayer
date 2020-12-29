@@ -204,6 +204,16 @@ private slots:
 
     void on_MusiclistWidget_customContextMenuRequested(const QPoint &pos);
 
+    void on_Play_Playlist(QList<QListWidgetItem *> items);
+
+    void on_MusiclistWidget_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_MusiclistWidget_itemClicked(QListWidgetItem *item);
+
+    void on_PlayListTable_itemDoubleClicked(QTableWidgetItem *item);
+
+    void on_PlayListTable_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
 
@@ -220,7 +230,7 @@ private:
     void searchMusic(QString key);                      // 搜索音乐
     void setSearchResultTable(SongList songs);          // 搜索结果数据到table
     void setSearchResultTable(PlayListList playLists);
-    void setPlayListTable(SongList songs, QTableWidget* table);
+    void setPlayListTable(QList<Music> songs, QTableWidget* table);
     void setPLAYLISTTable(PlayListList playlist, QListWidget* list);
 
     // 下载音乐

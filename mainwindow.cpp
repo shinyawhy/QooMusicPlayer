@@ -1203,7 +1203,7 @@ void MainWindow::setSearchResultTable(SongList songs)
     });
 }
 
-void MainWindow::setPlayListTable(SongList songs, QTableWidget *table)
+void MainWindow::setPlayListTable(QList<Music> songs, QTableWidget *table)
 {
 //    QTableWidget* table = ui->MusicTable;
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -2290,19 +2290,7 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     menu->addAction(deletePlayList);
 
     connect(playNow, &QAction::triggered, [=]{
-       ClearPlayList();
-
-        // 选择歌单开始播放
-       foreach (auto item, items)
-       {
-           // 选中的歌单
-           int row1 = ui->MusiclistWidget->row(item);
-           orderSongs.append(PLAYLIST.at(row1).contiansMusic);
-       }
-        startPlaySong(orderSongs.first());
-
-        saveSongList("music/order", orderSongs);
-        setPlayListTable(orderSongs, ui->MusicTable);
+       on_Play_Playlist(items);
     });
 
     connect(addToPlayList, &QAction::triggered, [=]{
@@ -2368,6 +2356,120 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
         }
         savePlayList("playlist/list", PLAYLIST);
         setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+    });
+
+    // 显示菜单
+    menu->exec(cursor().pos());
+
+    // 释放内存
+    QList<QAction*> list = menu->actions();
+    foreach(QAction* action, list)
+        delete action;
+    delete menu;
+}
+
+void MainWindow::on_Play_Playlist(QList<QListWidgetItem *> items)
+{
+    ClearPlayList();
+     // 选择歌单开始播放
+    foreach (auto item, items)
+    {
+        // 选中的歌单
+        int row1 = ui->MusiclistWidget->row(item);
+        orderSongs.append(PLAYLIST.at(row1).contiansMusic);
+    }
+     startPlaySong(orderSongs.first());
+
+     saveSongList("music/order", orderSongs);
+     setPlayListTable(orderSongs, ui->MusicTable);
+}
+
+
+
+void MainWindow::on_MusiclistWidget_itemDoubleClicked(QListWidgetItem *item)
+{
+    QList<QListWidgetItem *> items = ui->MusiclistWidget->selectedItems();
+    on_Play_Playlist(items);
+}
+
+void MainWindow::on_MusiclistWidget_itemClicked(QListWidgetItem *item)
+{
+    int index = ui->MusiclistWidget->row(item);
+    setPlayListTable(PLAYLIST.at(index).contiansMusic, ui->PlayListTable);
+    ui->stackedWidget->setCurrentWidget(ui->playListpage);
+}
+
+void MainWindow::on_PlayListTable_itemDoubleClicked(QTableWidgetItem *item)
+{
+    int row = ui->PlayListTable->row(item);
+    int index = ui->MusiclistWidget->currentRow();
+    Music currentsong;
+    if (row > -1 )
+        currentsong = PLAYLIST.at(index).contiansMusic.at(row);
+    if (orderSongs.contains(currentsong))
+    {
+        orderSongs.removeOne(currentsong);
+        setPlayListTable(orderSongs, ui->MusicTable);
+    }
+    else
+        orderSongs.insert(0, currentsong);
+    startPlaySong(currentsong);
+}
+
+void MainWindow::on_PlayListTable_customContextMenuRequested(const QPoint &pos)
+{
+    auto items = ui->PlayListTable->selectedItems();
+    int index = ui->MusiclistWidget->currentRow();
+    QList<Music> musics;
+    foreach (auto item, items)
+    {
+        int row = ui->PlayListTable->row(item);
+        int col = ui->PlayListTable->column(item);
+        if (col != 0)
+            continue;
+        musics.append(PLAYLIST.at(index).contiansMusic.at(row));
+    }
+    int row = ui->PlayListTable->currentRow();
+    Music currentsong;
+    if (row > -1)
+        currentsong = PLAYLIST.at(index).contiansMusic.at(row);
+
+    QMenu* menu = new QMenu(this);
+
+    QAction *playNow = new QAction("立即播放", this);
+    QAction *playNext = new QAction("下一首播放", this);
+    QAction *addToPlayList = new QAction("添加到播放列表", this);
+    QAction *removeToPlayList = new QAction("从歌单中移除", this);
+
+    menu->addAction(playNow);
+    menu->addAction(playNext);
+    menu->addAction(addToPlayList);
+    menu->addAction(removeToPlayList);
+
+    connect(playNow, &QAction::triggered, [=]{
+        startPlaySong(currentsong);
+    });
+
+    connect(playNext, &QAction::triggered, [=]{
+       appendNextSongs(musics);
+    });
+
+    connect(addToPlayList, &QAction::triggered, [=]{
+        appendOrderSongs(musics);
+    });
+
+    connect(removeToPlayList, &QAction::triggered, [=]{
+        foreach (Music music, musics)
+        {
+            if (PLAYLIST[index].contiansMusic.removeOne(music))
+            {
+                qDebug()<< "从歌单中删除："<< music.simpleString();
+            }
+        }
+        savePlayList("playlist/list", PLAYLIST);
+        setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+        ui->MusiclistWidget->setCurrentRow(index);
+        setPlayListTable(PLAYLIST.at(index).contiansMusic, ui->PlayListTable);
     });
 
     // 显示菜单
