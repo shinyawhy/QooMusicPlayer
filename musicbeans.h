@@ -1,6 +1,5 @@
 #ifndef MUSIC_H
 #define MUSIC_H
-#include <QString>
 #include <QUrl>
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -8,6 +7,7 @@
 #include <QJsonArray>
 #include <QList>
 #include <QDateTime>
+#include <QSettings>
 
 #define JSON_VAL_LONG(json, x) static_cast<qint64>(json.value(#x).toDouble())
 #define JVAL_LONG(x) static_cast<qint64>(json.value(#x).toDouble())
@@ -148,15 +148,15 @@ struct PlayList
       PlayList playlist;
 //      music.id = JVAL_LONG(id);
       playlist.name = JVAL_STR(name);
-//      QJsonArray array = json.value("artists").toArray(); // json中读出的artist放入一个数组
-//      QStringList artistNameList;
-//      foreach (QJsonValue val, array)
-//      {
-//         Artist artist = Artist::fromJson(val.toObject());
-//         music.artists.append(artist);
-//         artistNameList.append(artist.name);
-//      }
 
+      QJsonArray array = json.value("contiansMusic").toArray();
+      QStringList contiansMusicList;
+      foreach (QJsonValue val, array)
+      {
+          Music music = Music::fromJson(val.toObject());
+          playlist.contiansMusic.append(music);
+          contiansMusicList.append(music.name);
+      }
 //      music.artistNames = artistNameList.join("/");
 //      music.album = Album::fromJson(json.value("album").toObject());
 //      music.duration = JVAL_INT(duration);
@@ -168,11 +168,11 @@ struct PlayList
       QJsonObject json;
 //      json.insert("id", id);
       json.insert("name", name);
+      QJsonArray array;
+      foreach (Music music, contiansMusic)
+          array.append(music.toJson());
+      json.insert("contiansMusic", array);
 //      json.insert("duration", duration);
-//      QJsonArray array;
-//      foreach (Artist artist, artists)
-//          array.append(artist.toJson());
-//      json.insert("artists", array);
 //      json.insert("album", album.toJson());
       return json;
   }

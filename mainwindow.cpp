@@ -791,6 +791,7 @@ void MainWindow::appendMusicToPlayList(SongList musics, int row)
         if (PLAYLIST.at(row).contiansMusic.contains(music))
             continue ;
         PLAYLIST[row].contiansMusic.append(music);
+        qDebug()<<"11"<<PLAYLIST.at(row).contiansMusic.size();
     }
 
     savePlayList("playlist/list", PLAYLIST);
@@ -799,12 +800,12 @@ void MainWindow::appendMusicToPlayList(SongList musics, int row)
 void MainWindow::ClearPlayList()
 {
 //    removeOrderSongs(orderSongs);
-    orderSongs.clear();
     settings.setValue("music/currentSong", "");
     ui->playingNameLabel->clear();
     ui->playingArtistLabel->clear();
     ui->playingCoverLablel->clear();
     player->stop();
+    orderSongs.clear();
     saveSongList("music/order", orderSongs);
     setPlayListTable(orderSongs, ui->MusicTable);
 }
@@ -2267,6 +2268,20 @@ void MainWindow::on_add_list_Button_clicked()
 void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos)
 {
     auto items = ui->MusiclistWidget->selectedItems();
+    auto cout = ui->MusiclistWidget->count();
+    QList<PlayList> playlistscout;
+    for(int i = 0; i < cout; i++)
+    {
+//        int row1 = ui->MusiclistWidget->row();
+        playlistscout.append(PLAYLIST.at(i));
+    }
+    QList<PlayList> playlists;
+    foreach (auto item, items)
+    {
+        // 选中的歌单
+        int row = ui->MusiclistWidget->row(item);
+        playlists.append(PLAYLIST.at(row));
+    }
 
     int row = ui->MusiclistWidget->currentRow();
     PlayList currentplaylist;
@@ -2288,14 +2303,9 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     connect(playNow, &QAction::triggered, [=]{
         ClearPlayList();
         // 选择歌单开始播放
-        QList<PlayList> playlists;
 
-        foreach (auto item, items)
-        {
-            int row = ui->MusiclistWidget->row(item);
-            playlists.append(PLAYLIST.at(row));
-        }
-        orderSongs.append(playlists.at(row).contiansMusic);
+        int row = ui->MusiclistWidget->currentRow();
+        orderSongs.append(PLAYLIST.at(row).contiansMusic);
         startPlaySong(orderSongs.first());
 
         saveSongList("music/order", orderSongs);
@@ -2304,20 +2314,19 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
 
     connect(addToPlayList, &QAction::triggered, [=]{
         // 添加进播放列表
-        QList<PlayList> playlists;
+        QList<PlayList> playlists1 = playlistscout;
 
-        foreach (auto item, items)
-        {
-            int row = ui->MusiclistWidget->row(item);
-            playlists.append(PLAYLIST.at(row));
-        }
-
-        foreach(Music music, playlists[row].contiansMusic)
+        foreach(Music music, playlists1[row].contiansMusic)
         {
             if (orderSongs.contains(music))
-                playlists[row].contiansMusic.removeOne(music);
+                playlists1[row].contiansMusic.removeOne(music);
         }
-        orderSongs.append(playlists.at(row).contiansMusic);
+        orderSongs.append(playlists1.at(row).contiansMusic);
+        if (isNotPlaying() && orderSongs.size())
+        {
+            qDebug() << "当前未播放， 开始播放列表";
+            startPlaySong(orderSongs.first());
+        }
 
         saveSongList("music/order", orderSongs);
         setPlayListTable(orderSongs, ui->MusicTable);
@@ -2351,14 +2360,12 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     });
 
     connect(deletePlayList, &QAction::triggered, [=]{
-        QList<PlayList> playlists;
-
-        foreach (auto item, items)
-        {
-            int row = ui->MusiclistWidget->row(item);
-            playlists.append(PLAYLIST.at(row));
-        }
-
+//        QList<PlayList> playlists;
+//        foreach (auto item, items)
+//        {
+//            int row = ui->MusiclistWidget->row(item);
+//            playlists.append(PLAYLIST.at(row));
+//        }
         foreach(PlayList pl, playlists)
         {
             PLAYLIST.removeOne(pl);
