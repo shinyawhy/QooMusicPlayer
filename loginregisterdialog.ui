@@ -61,7 +61,7 @@ border:none;</string>
         <string>QooMusic</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="icon.qrc">
          <normaloff>:/icon/handle</normaloff>:/icon/handle</iconset>
        </property>
        <property name="iconSize">
@@ -128,7 +128,7 @@ border:none;</string>
       </spacer>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_2">
+      <widget class="QLineEdit" name="usernameLine">
        <property name="placeholderText">
         <string>请输入用户名</string>
        </property>
@@ -181,7 +181,7 @@ border:none;</string>
       </spacer>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="passwordLine">
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
@@ -242,14 +242,14 @@ border:none;</string>
         <number>0</number>
        </property>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="loginButton">
          <property name="text">
           <string>登录</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="registerButton">
          <property name="text">
           <string>注册</string>
          </property>
@@ -287,6 +287,8 @@ border:none;</string>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="icon.qrc"/>
+ </resources>
  <connections/>
 </ui>

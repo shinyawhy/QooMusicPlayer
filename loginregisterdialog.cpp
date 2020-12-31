@@ -11,7 +11,7 @@ LoginRegisterDialog::LoginRegisterDialog(QWidget *parent) :
 
     this->setWindowModality(Qt::WindowModal);
 
-    this->setWindowTitle("用户登录");
+    this->setWindowTitle("用户登录 - 酷云音乐");
 
     this->setFixedSize(this->width(), this->height());
 }
@@ -19,4 +19,13 @@ LoginRegisterDialog::LoginRegisterDialog(QWidget *parent) :
 LoginRegisterDialog::~LoginRegisterDialog()
 {
     delete ui;
+}
+
+void LoginRegisterDialog::on_loginButton_clicked()
+{
+    QString username = ui->usernameLine->text();
+    QString password = ui->passwordLine->text();
+
+
+
 }
