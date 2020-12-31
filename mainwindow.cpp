@@ -2481,3 +2481,9 @@ void MainWindow::on_PlayListTable_customContextMenuRequested(const QPoint &pos)
         delete action;
     delete menu;
 }
+
+void MainWindow::on_logo_button_clicked()
+{
+    LoginRegisterDialog *lrd = new LoginRegisterDialog(this);
+    lrd->show();
+}

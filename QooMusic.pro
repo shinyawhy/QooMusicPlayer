@@ -26,6 +26,7 @@ SOURCES += \
     framelesshelper/CursorPosCalculator.cpp \
     framelesshelper/WidgetData.cpp \
     framelesshelper/frameless_helper.cpp \
+    loginregisterdialog.cpp \
     main.cpp \
     mainwindow.cpp \
     music.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
     framelesshelper/FramelessHelperPrivate.h \
     framelesshelper/WidgetData.h \
     framelesshelper/frameless_helper.h \
+    loginregisterdialog.h \
     lyricstreamwidget.h \
     mainwindow.h \
     musicbeans.h \
@@ -49,6 +51,7 @@ HEADERS += \
     volumecontrol.h
 
 FORMS += \
+    loginregisterdialog.ui \
     mainwindow.ui \
     volumecontrol.ui
 

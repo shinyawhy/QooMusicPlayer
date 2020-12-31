@@ -43,7 +43,7 @@
 #include "lyricstreamwidget.h"
 #include "desktoplyricwidget.h"
 #include "mymenu.h"
-
+#include "loginregisterdialog.h"
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -214,6 +214,8 @@ private slots:
 
     void on_PlayListTable_customContextMenuRequested(const QPoint &pos);
 
+    void on_logo_button_clicked();
+    
 private:
     Ui::MainWindow *ui;
 
