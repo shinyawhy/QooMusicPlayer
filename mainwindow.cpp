@@ -2290,7 +2290,7 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     menu->addAction(deletePlayList);
 
     connect(playNow, &QAction::triggered, [=]{
-       on_Play_Playlist(items);
+       Play_Playlist(items);
     });
 
     connect(addToPlayList, &QAction::triggered, [=]{
@@ -2368,7 +2368,7 @@ void MainWindow::on_MusiclistWidget_customContextMenuRequested(const QPoint &pos
     delete menu;
 }
 
-void MainWindow::on_Play_Playlist(QList<QListWidgetItem *> items)
+void MainWindow::Play_Playlist(QList<QListWidgetItem *> items)
 {
     ClearPlayList();
      // 选择歌单开始播放
@@ -2389,7 +2389,7 @@ void MainWindow::on_Play_Playlist(QList<QListWidgetItem *> items)
 void MainWindow::on_MusiclistWidget_itemDoubleClicked(QListWidgetItem *item)
 {
     QList<QListWidgetItem *> items = ui->MusiclistWidget->selectedItems();
-    on_Play_Playlist(items);
+    Play_Playlist(items);
 }
 
 void MainWindow::on_MusiclistWidget_itemClicked(QListWidgetItem *item)

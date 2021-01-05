@@ -204,7 +204,7 @@ private slots:
 
     void on_MusiclistWidget_customContextMenuRequested(const QPoint &pos);
 
-    void on_Play_Playlist(QList<QListWidgetItem *> items);
+    void Play_Playlist(QList<QListWidgetItem *> items);
 
     void on_MusiclistWidget_itemDoubleClicked(QListWidgetItem *item);
 

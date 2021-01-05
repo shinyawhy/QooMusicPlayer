@@ -48,6 +48,7 @@ HEADERS += \
     musicbeans.h \
     musiclist.h \
     mymenu.h \
+    netutil.h \
     volumecontrol.h
 
 FORMS += \
