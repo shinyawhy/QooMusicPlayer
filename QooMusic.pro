@@ -17,7 +17,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += color_octree/ \
-               framelesshelper/
+               framelesshelper/ \
+               loginregister/
 
 SOURCES += \
     color_octree/coloroctree.cpp \
@@ -26,12 +27,15 @@ SOURCES += \
     framelesshelper/CursorPosCalculator.cpp \
     framelesshelper/WidgetData.cpp \
     framelesshelper/frameless_helper.cpp \
-    loginregisterdialog.cpp \
+    loginregister/bottomlineedit.cpp \
+    loginregister/labelededit.cpp \
+    loginregister/loginregisterdialog.cpp \
     main.cpp \
     mainwindow.cpp \
     music.cpp \
     musiclist.cpp \
     mymenu.cpp \
+    stringutil.cpp \
     volumecontrol.cpp
 
 HEADERS += \
@@ -42,17 +46,20 @@ HEADERS += \
     framelesshelper/FramelessHelperPrivate.h \
     framelesshelper/WidgetData.h \
     framelesshelper/frameless_helper.h \
-    loginregisterdialog.h \
+    loginregister/bottomlineedit.h \
+    loginregister/labelededit.h \
+    loginregister/loginregisterdialog.h \
     lyricstreamwidget.h \
     mainwindow.h \
     musicbeans.h \
     musiclist.h \
     mymenu.h \
     netutil.h \
+    stringutil.h \
     volumecontrol.h
 
 FORMS += \
-    loginregisterdialog.ui \
+    loginregister/loginregisterdialog.ui \
     mainwindow.ui \
     volumecontrol.ui
 

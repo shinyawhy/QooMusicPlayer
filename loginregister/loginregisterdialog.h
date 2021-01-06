@@ -2,6 +2,9 @@
 #define LOGINREGISTERDIALOG_H
 
 #include <QDialog>
+#include <QMessageBox>
+#include "netutil.h"
+#include "stringutil.h"
 
 namespace Ui {
 class LoginRegisterDialog;
@@ -18,8 +21,11 @@ public:
 private slots:
     void on_loginButton_clicked();
 
+    void on_registerButton_clicked();
+
 private:
     Ui::LoginRegisterDialog *ui;
+    QString SP;
 };
 
 #endif // LOGINREGISTERDIALOG_H
