@@ -2,6 +2,7 @@
 #include "ui_loginregisterdialog.h"
 
 LoginRegisterDialog::LoginRegisterDialog(QWidget *parent) : SP("http://49.235.255.205/poorrow/"),
+    settings(QApplication::applicationDirPath() + "/musics.ini", QSettings::Format::IniFormat),
     QDialog(parent),
     ui(new Ui::LoginRegisterDialog)
 {
@@ -36,13 +37,15 @@ void LoginRegisterDialog::on_loginButton_clicked()
     ui->passwordWidget->setMsgText("");
     ui->usernameWidget->setMsgText("");
     NetUtil* n = new NetUtil(SP + "login.php", QStringList{"username", username, "password", password});
-
     connect(n, &NetUtil::finished, [=](QString s){
-        qDebug()<<s<<username<<password;
         if (getXml(s, "STATE") == "OK")
         {
             ui->passwordWidget->showCorrect();
             ui->passwordWidget->setMsgText("登录成功");
+            this->username = username;
+            this->password = password;
+            loginState = true;
+            loginFinished();
         }
         else
         {
@@ -74,4 +77,17 @@ void LoginRegisterDialog::on_registerButton_clicked()
             ui->passwordWidget->showWrong(getXml(s, "REASON"));
         }
     });
+}
+/**
+ * 登录成功以后
+ */
+void LoginRegisterDialog::loginFinished()
+{
+    // 用户信息
+    settings.setValue("music/username", username);
+    settings.setValue("music/password", password);
+    settings.setValue("music/loginState", loginState);
+
+    emit signalLoginFinished();
+
 }

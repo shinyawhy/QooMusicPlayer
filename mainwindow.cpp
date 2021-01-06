@@ -235,6 +235,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 读取数据
     ui->stackedWidget->setCurrentIndex(settings.value("stackWidget/pageIndex").toInt());
+    ui->logo_button->setText(settings.value("music/username").toString());
     restoreSongList("music/order", orderSongs);
     restoreSongList("music/local", localSongs);
     restoreSongList("music/favorite", favoriteSongs);
@@ -2484,6 +2485,21 @@ void MainWindow::on_PlayListTable_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::on_logo_button_clicked()
 {
-    LoginRegisterDialog *lrd = new LoginRegisterDialog(this);
-    lrd->show();
+    bool LS = settings.value("music/loginState").toBool();
+    if(!LS)// LS = false 为登录
+    {
+        LoginRegisterDialog *lrd = new LoginRegisterDialog(this);
+        lrd->show();
+        connect(lrd, &LoginRegisterDialog::signalLoginFinished,[=]{
+            ui->logo_button->setText(settings.value("music/username").toString());
+//            ui->logo_button->setIcon()
+            QTimer::singleShot(1200, [=]{
+                lrd->close();
+            });
+        });
+    }
+    else
+    {
+        // 打开用户界面
+    }
 }
