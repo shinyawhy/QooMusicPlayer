@@ -87,7 +87,6 @@ void LoginRegisterDialog::loginFinished()
     settings.setValue("music/username", username);
     settings.setValue("music/password", password);
     settings.setValue("music/loginState", loginState);
-
     emit signalLoginFinished();
 
 }

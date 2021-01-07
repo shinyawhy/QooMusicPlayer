@@ -44,6 +44,8 @@
 #include "desktoplyricwidget.h"
 #include "mymenu.h"
 #include "loginregisterdialog.h"
+#include "netutil.h"
+#include "stringutil.h"
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -216,6 +218,10 @@ private slots:
 
     void on_logo_button_clicked();
     
+    void on_LogoutButton_clicked();
+
+    void on_SyncButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -268,6 +274,11 @@ private:
     // 读取配置
     void restoreSongList(QString key, SongList &songs);
     void restorePlayList(QString key, PlayListList &playlistlist);
+
+    // QJSON QString互相转化
+    QJsonArray QstringToJson(QString jsonString);
+    QString JsonToQstring(QJsonArray jsonArray);
+
 
 private:
     void setAppearBgProg(int x);
@@ -338,6 +349,8 @@ private:
     BFSColor currentPa;
     double paletteAlpha;
 
+    QString SP;
+
 protected:
     // 重新实现拖动操作
     virtual void mouseMoveEvent(QMouseEvent *event) override;
@@ -368,6 +381,8 @@ signals:
 
     void signalSongPlayStarted(Music music);
     void signalSongPlayFinished(Music music);
+
+    void signalLogout();
 
 };
 #endif // MAINWINDOW_H

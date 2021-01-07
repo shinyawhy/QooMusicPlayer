@@ -26,7 +26,7 @@
      <number>11</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,2,0,0,0,0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,2,0,0,0,0,0,0,0,0">
       <item>
        <widget class="QPushButton" name="logo_button">
         <property name="minimumSize">
@@ -159,6 +159,37 @@ border:none;
         <property name="icon">
          <iconset resource="icon.qrc">
           <normaloff>:/icon/menu</normaloff>:/icon/menu</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="SyncButton">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icon.qrc">
+          <normaloff>:/icon/sync</normaloff>:/icon/sync</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="LogoutButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icon.qrc">
+          <normaloff>:/icon/logout</normaloff>:/icon/logout</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -450,7 +481,7 @@ border:none;
 }</string>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>5</number>
         </property>
         <widget class="QWidget" name="searchResultPage">
          <property name="styleSheet">
@@ -700,6 +731,157 @@ QTableView QTableCornerButton::section
             <property name="gridStyle">
              <enum>Qt::SolidLine</enum>
             </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="Userpage">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QWidget{
+	
+	background-color: transparent;
+	/*border: none;*/
+}</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10" stretch="0,1">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,10">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="AvatarLabel">
+              <property name="minimumSize">
+               <size>
+                <width>50</width>
+                <height>50</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>50</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap resource="icon.qrc">:/icon/ap</pixmap>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <widget class="QLabel" name="UsernameLabel">
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>username</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTabWidget" name="tabWidget">
+            <property name="styleSheet">
+             <string notr="true">QTabWidget
+{
+	background: transparent;
+	border: none;
+}
+
+QTabWidget::tab-bar
+{
+	background: transparent;
+	border: none;
+}
+
+QTabWidget::pane
+{
+	background: transparent;
+	border: none;
+}
+
+QTabBar::tab
+{
+	background: transparent;
+}
+
+QTabBar::tab:hover
+{
+	background: rgba(255,255,255,64);
+}
+
+QTabBar::tab:selected
+{
+	background: rgba(255,255,255,128);
+}
+
+QTabBar::tab:disabled
+{
+	width: 0;
+	color: transparent;
+	tab-image: none;
+}</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="tab">
+             <property name="styleSheet">
+              <string notr="true">QWidget
+{
+	background: transparent;
+	border: none;
+}</string>
+             </property>
+             <attribute name="title">
+              <string> 歌单1</string>
+             </attribute>
+            </widget>
+            <widget class="QWidget" name="tab_2">
+             <property name="styleSheet">
+              <string notr="true">QWidget
+{
+	background: transparent;
+	border: none;
+}</string>
+             </property>
+             <attribute name="title">
+              <string> 歌单2</string>
+             </attribute>
+            </widget>
            </widget>
           </item>
          </layout>

@@ -28,5 +28,8 @@
         <file alias="tray">icon/systemTray.png</file>
         <file alias="exit">icon/exit.png</file>
         <file alias="min2">icon/min2.png</file>
+        <file alias="ap">icon/avatarProfile.png</file>
+        <file alias="logout">icon/logout.png</file>
+        <file alias="sync">icon/sync.png</file>
     </qresource>
 </RCC>
