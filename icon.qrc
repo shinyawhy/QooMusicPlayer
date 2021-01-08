@@ -31,5 +31,6 @@
         <file alias="ap">icon/avatarProfile.png</file>
         <file alias="logout">icon/logout.png</file>
         <file alias="sync">icon/sync.png</file>
+        <file alias="hide_right">icon/hide_right.png</file>
     </qresource>
 </RCC>

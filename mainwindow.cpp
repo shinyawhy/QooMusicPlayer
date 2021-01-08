@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     expandPlayingButton(new QPushButton(this)),
     mySystemTray(new QSystemTrayIcon(this)),
     desktopLyric(new DesktopLyricWidget()),
-    SP("http://49.235.255.205/poorrow/"),
+    SP("http://49.235.255.205/poorrow/"),tip_box(new TipBox(this)),
     action_systemTray_playmode(new QAction(this)), music_info(new QAction(this))
 {
     ui->setupUi(this);
@@ -118,7 +118,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->MusicTable->horizontalScrollBar()->setStyleSheet(hScrollBarSS);
     ui->SyncButton->setStyleSheet("text-align:left");
 
+//    tip_box = new TipBox(this);
+    connect(tip_box, &TipBox::signalCardClicked, [=](NotificationEntry* n){
+        qDebug() << n->toString();
+    });
+    connect(tip_box, &TipBox::signalBtnClicked, [=](NotificationEntry* n){
+        qDebug() << n->toString();
+    });
 
+    QScreen* screen = QApplication::screenAt(QCursor::pos());
+    QRect rect = screen->availableGeometry();
+    move(rect.center()-QPoint(width()/2,height()/2));
 
     // 系统托盘
     mySystemTray->setIcon(QIcon(":/icon/tray"));
@@ -246,6 +256,7 @@ MainWindow::MainWindow(QWidget *parent)
     restoreSongList("music/favorite", favoriteSongs);
     restorePlayList("playlist/list", PLAYLIST);
     setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+    ui->UsernameLabel->setText(settings.value("music/username").toString());
 
     // 音量
     int volume = settings.value("music/volume", 50).toInt();
@@ -1474,6 +1485,8 @@ void MainWindow::closeEvent(QCloseEvent *)
 void MainWindow::resizeEvent(QResizeEvent *)
 {
     adjustExpandPlayingButton();
+
+    tip_box->adjustPosition();
 }
 
 void MainWindow::paintEvent(QPaintEvent *e)
@@ -2527,6 +2540,7 @@ void MainWindow::on_LogoutButton_clicked()
 {
     setPlayListTable(localSongs, ui->localMusicTable);
     ui->stackedWidget->setCurrentWidget(ui->localMusicpage);
+    on_SyncButton_clicked();
     bool loginState = false;
     QString password = "";
     QString username = "";
@@ -2534,11 +2548,6 @@ void MainWindow::on_LogoutButton_clicked()
     settings.setValue("music/username", username);
     settings.setValue("music/loginState", loginState);
     settings.setValue("music/password", password);
-    // 清空歌单列表
-    PLAYLIST.clear();
-    savePlayList("playlist/list", PLAYLIST);
-    setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
-
 
     emit signalLogout();
 }
@@ -2549,23 +2558,30 @@ void MainWindow::on_SyncButton_clicked()
     QString username = settings.value("music/username").toString();
     QString password = settings.value("music/password").toString();
     QJsonArray playlistSync = settings.value("playlist/list").toJsonArray();
-    qDebug()<<username<<password<<JsonToQstring(playlistSync);
     NetUtil* d = new NetUtil(SP + "upload.php", QStringList{"username", username, "password", password, "playlist", JsonToQstring(playlistSync)});
     connect(d, &NetUtil::finished, [=](QString s){
-
         if (getXml(s, "STATE") == "OK")
         {
             // 同步成功
-            qDebug()<<"同步成功";
+            NoticeDialog *nd = new NoticeDialog(this);
+            nd->OnSyncFinished("同步成功");
+            nd->show();
+            QTimer::singleShot(1200, [=]{
+                nd->close();
+            });
         }
         else
         {
             //同步失败
+            NoticeDialog *nd = new NoticeDialog(this);
+            nd->OnSyncFinished("同步失败"+getXml(s, "REASON"));
+            nd->show();
+            QTimer::singleShot(1200, [=]{
+                nd->close();
+            });
         }
-
     });
 }
-
 
 QJsonArray MainWindow::QstringToJson(QString jsonString)
 {

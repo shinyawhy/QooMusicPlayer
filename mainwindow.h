@@ -35,6 +35,10 @@
 #include <QList>
 #include <QMediaPlaylist>
 #include <QListWidget>
+#include <QResizeEvent>
+#include <QScreen>
+#include <QDesktopServices>
+#include "tipbox.h"
 #include "musicbeans.h"
 //#include "musiclist.h"
 #include "volumecontrol.h"
@@ -46,6 +50,7 @@
 #include "loginregisterdialog.h"
 #include "netutil.h"
 #include "stringutil.h"
+#include "noticedialog.h"
 
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -315,7 +320,7 @@ private:
 
     PlayListList PLAYLIST;           // 歌单
 
-
+    TipBox* tip_box;
 
     bool isSongDownFailed = false;
     qint64 setPlayPositionAfterLoad = 0; // 加载后跳转到时间

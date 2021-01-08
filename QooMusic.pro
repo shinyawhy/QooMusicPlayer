@@ -18,7 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += color_octree/ \
                framelesshelper/ \
-               loginregister/
+               loginregister/ \
+               win_buttons/
 
 SOURCES += \
     color_octree/coloroctree.cpp \
@@ -35,8 +36,23 @@ SOURCES += \
     music.cpp \
     musiclist.cpp \
     mymenu.cpp \
+    noticedialog.cpp \
     stringutil.cpp \
-    volumecontrol.cpp
+    tipbox.cpp \
+    tipcard.cpp \
+    volumecontrol.cpp \
+    win_buttons/generalbuttoninterface.cpp \
+    win_buttons/interactivebuttonbase.cpp \
+    win_buttons/pointmenubutton.cpp \
+    win_buttons/threedimenbutton.cpp \
+    win_buttons/watercirclebutton.cpp \
+    win_buttons/waterfloatbutton.cpp \
+    win_buttons/winclosebutton.cpp \
+    win_buttons/winmaxbutton.cpp \
+    win_buttons/winmenubutton.cpp \
+    win_buttons/winminbutton.cpp \
+    win_buttons/winrestorebutton.cpp \
+    win_buttons/winsidebarbutton.cpp
 
 HEADERS += \
     color_octree/coloroctree.h \
@@ -55,12 +71,29 @@ HEADERS += \
     musiclist.h \
     mymenu.h \
     netutil.h \
+    noticedialog.h \
+    notificationentry.h \
     stringutil.h \
-    volumecontrol.h
+    tipbox.h \
+    tipcard.h \
+    volumecontrol.h \
+    win_buttons/generalbuttoninterface.h \
+    win_buttons/interactivebuttonbase.h \
+    win_buttons/pointmenubutton.h \
+    win_buttons/threedimenbutton.h \
+    win_buttons/watercirclebutton.h \
+    win_buttons/waterfloatbutton.h \
+    win_buttons/winclosebutton.h \
+    win_buttons/winmaxbutton.h \
+    win_buttons/winmenubutton.h \
+    win_buttons/winminbutton.h \
+    win_buttons/winrestorebutton.h \
+    win_buttons/winsidebarbutton.h
 
 FORMS += \
     loginregister/loginregisterdialog.ui \
     mainwindow.ui \
+    noticedialog.ui \
     volumecontrol.ui
 
 # Default rules for deployment.
