@@ -481,7 +481,7 @@ border:none;
 }</string>
         </property>
         <property name="currentIndex">
-         <number>5</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="searchResultPage">
          <property name="styleSheet">
@@ -856,32 +856,8 @@ QTabBar::tab:disabled
 }</string>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>-1</number>
             </property>
-            <widget class="QWidget" name="tab">
-             <property name="styleSheet">
-              <string notr="true">QWidget
-{
-	background: transparent;
-	border: none;
-}</string>
-             </property>
-             <attribute name="title">
-              <string> 歌单1</string>
-             </attribute>
-            </widget>
-            <widget class="QWidget" name="tab_2">
-             <property name="styleSheet">
-              <string notr="true">QWidget
-{
-	background: transparent;
-	border: none;
-}</string>
-             </property>
-             <attribute name="title">
-              <string> 歌单2</string>
-             </attribute>
-            </widget>
            </widget>
           </item>
          </layout>

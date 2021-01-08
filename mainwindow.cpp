@@ -257,6 +257,19 @@ MainWindow::MainWindow(QWidget *parent)
     restorePlayList("playlist/list", PLAYLIST);
     setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
     ui->UsernameLabel->setText(settings.value("music/username").toString());
+    loginState = settings.value("music/loginState").toBool();
+    if (loginState)
+    {
+       ui->SyncButton->setEnabled(true);
+       ui->LogoutButton->setEnabled(true);
+       setPlaylistTab(PLAYLIST, ui->tabWidget);
+    }
+    else
+    {
+        ui->SyncButton->setEnabled(false);
+        ui->LogoutButton->setEnabled(false);
+    }
+
 
     // 音量
     int volume = settings.value("music/volume", 50).toInt();
@@ -808,7 +821,7 @@ void MainWindow::appendMusicToPlayList(SongList musics, int row)
         if (PLAYLIST.at(row).contiansMusic.contains(music))
             continue ;
         PLAYLIST[row].contiansMusic.append(music);
-        qDebug()<<"11"<<PLAYLIST.at(row).contiansMusic.size();
+//        qDebug()<<"11"<<PLAYLIST.at(row).contiansMusic.size();
     }
 
     savePlayList("playlist/list", PLAYLIST);
@@ -1278,6 +1291,31 @@ void MainWindow::setPLAYLISTTable(PlayListList playlist, QListWidget *list)
     for (int index = 0; index < playlist.size(); index++)
     {
         ui->MusiclistWidget->addItem(playlist.at(index).name);
+    }
+}
+
+void MainWindow::setPlaylistTab(PlayListList pl, QTabWidget *tab)
+{
+    ui->tabWidget->clear();
+    for (int index = 0; index < pl.size(); index++)
+    {
+        QListView *QLV = new QListView(tab);
+        tab->addTab(QLV, pl.at(index).name);
+        QLV->setContextMenuPolicy(Qt::CustomContextMenu);
+        QLV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        connect(QLV, &QListView::customContextMenuRequested, this, [=](QPoint){
+            ShowPlaylistTabMenu(QLV);
+        });
+        QStringList sl;
+        foreach (Music music, pl.at(index).contiansMusic)
+        {
+            sl << music.simpleString();
+        }
+        QAbstractItemModel *model = QLV->model();
+        if (model)
+            delete model;
+        model = new QStringListModel(sl);
+        QLV->setModel(model);
     }
 }
 
@@ -2521,6 +2559,7 @@ void MainWindow::on_logo_button_clicked()
                 foreach(QJsonValue val, array)
                     PLAYLIST.append(PlayList::fromJson(val.toObject()));
                 savePlayList("playlist/list", PLAYLIST);
+                setPlaylistTab(PLAYLIST, ui->tabWidget);
                 setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
             });
             QTimer::singleShot(1200, [=]{
@@ -2548,7 +2587,10 @@ void MainWindow::on_LogoutButton_clicked()
     settings.setValue("music/username", username);
     settings.setValue("music/loginState", loginState);
     settings.setValue("music/password", password);
-
+    // 清空歌单列表
+    PLAYLIST.clear();
+    savePlayList("playlist/list", PLAYLIST);
+    setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
     emit signalLogout();
 }
 
@@ -2581,6 +2623,65 @@ void MainWindow::on_SyncButton_clicked()
             });
         }
     });
+}
+
+void MainWindow::ShowPlaylistTabMenu(QListView* QLV)
+{
+      auto indexs = QLV->selectionModel()->selectedRows(0);
+      int currentIndex = ui->tabWidget->currentIndex();   // 当前选择的tab页index
+      int row1 = QLV->currentIndex().row();   // 当前选择tab页的第几行
+      SongList musics;
+      Music currentMusic;
+      foreach (auto index, indexs)
+          musics.append(PLAYLIST.at(currentIndex).contiansMusic.at(index.row()));
+      if (row1 > -1)
+        currentMusic = PLAYLIST.at(currentIndex).contiansMusic.at(row1);
+
+      QMenu* menu = new QMenu(this);
+
+      QAction *playNow = new QAction("立即播放", this);
+      QAction *playNext = new QAction("下一首播放", this);
+      QAction *addToPlayList = new QAction("添加到播放列表", this);
+      QAction *removeToPlayList = new QAction("从歌单中移除", this);
+
+      menu->addAction(playNow);
+      menu->addAction(playNext);
+      menu->addAction(addToPlayList);
+      menu->addAction(removeToPlayList);
+
+      connect(playNow, &QAction::triggered, [=]{
+          startPlaySong(currentMusic);
+      });
+
+      connect(playNext, &QAction::triggered, [=]{
+         appendNextSongs(musics);
+      });
+
+      connect(addToPlayList, &QAction::triggered, [=]{
+          appendOrderSongs(musics);
+      });
+
+      connect(removeToPlayList, &QAction::triggered, [=]{
+          foreach (Music music, musics)
+          {
+              if (PLAYLIST[currentIndex].contiansMusic.removeOne(music))
+              {
+                  qDebug()<< "从歌单中删除："<< music.simpleString();
+              }
+          }
+          savePlayList("playlist/list", PLAYLIST);
+          setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
+          setPlaylistTab(PLAYLIST, ui->tabWidget);
+      });
+
+      // 显示菜单
+      menu->exec(cursor().pos());
+
+      // 释放内存
+      QList<QAction*> list = menu->actions();
+      foreach(QAction* action, list)
+          delete action;
+      delete menu;
 }
 
 QJsonArray MainWindow::QstringToJson(QString jsonString)

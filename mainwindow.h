@@ -227,6 +227,8 @@ private slots:
 
     void on_SyncButton_clicked();
 
+    void ShowPlaylistTabMenu(QListView *QLV);
+
 private:
     Ui::MainWindow *ui;
 
@@ -245,6 +247,7 @@ private:
     void setSearchResultTable(PlayListList playLists);
     void setPlayListTable(QList<Music> songs, QTableWidget* table);
     void setPLAYLISTTable(PlayListList playlist, QListWidget* list);
+    void setPlaylistTab(PlayListList pl, QTabWidget* tab);
 
     // 下载音乐
     void playLocalSong(Music music);
@@ -355,6 +358,7 @@ private:
     double paletteAlpha;
 
     QString SP;
+    bool loginState = false;    // 登录状态
 
 protected:
     // 重新实现拖动操作
