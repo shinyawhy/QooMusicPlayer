@@ -2556,8 +2556,15 @@ void MainWindow::on_logo_button_clicked()
             connect(d, &NetUtil::finished, [=](QString s){
                 // 云端歌单列表保存为配置文件
                 QJsonArray array = QstringToJson(getXml(s, "PLAYLIST"));
+
+                qDebug()<<"XML"<<getXml(s, "PLAYLIST");
+                qDebug()<<"PLAYLIST"<<s<<"JSON"<<JsonToQstring(array);
+
                 foreach(QJsonValue val, array)
                     PLAYLIST.append(PlayList::fromJson(val.toObject()));
+
+                qDebug()<<"size"<<PLAYLIST.size();
+
                 savePlayList("playlist/list", PLAYLIST);
                 setPlaylistTab(PLAYLIST, ui->tabWidget);
                 setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
@@ -2572,6 +2579,7 @@ void MainWindow::on_logo_button_clicked()
     {
         ui->stackedWidget->setCurrentWidget(ui->Userpage);
         // 打开用户界面
+       setPlaylistTab(PLAYLIST, ui->tabWidget);
     }
 }
 
@@ -2686,13 +2694,27 @@ void MainWindow::ShowPlaylistTabMenu(QListView* QLV)
 
 QJsonArray MainWindow::QstringToJson(QString jsonString)
 {
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonString.toLocal8Bit().data());
-    if(jsonDocument.isNull())
+//    qDebug()<<"====="<<jsonString;
+//    QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonString.toLocal8Bit().data());
+//    if(jsonDocument.isNull())
+//    {
+//        qDebug()<< "String NULL"<< jsonString.toLocal8Bit().data();
+//    }
+//    QJsonArray jsonArray = jsonDocument.array();
+
+    QJsonDocument document;
+    QJsonParseError err;
+    document = QJsonDocument::fromJson(jsonString.toUtf8(), &err);
+
+    if (err.error != QJsonParseError::NoError)
+
     {
-        qDebug()<< "String NULL"<< jsonString.toLocal8Bit().data();
-    }
-    QJsonArray jsonArray = jsonDocument.array();
-    return jsonArray;
+            qDebug() << "Parse json " << jsonString.toUtf8() << " error: " << err.error;
+
+      }
+
+    QJsonArray  data(document.array());
+    return data;
 }
 
 QString MainWindow::JsonToQstring(QJsonArray jsonArray)
