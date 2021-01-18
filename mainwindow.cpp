@@ -2556,15 +2556,8 @@ void MainWindow::on_logo_button_clicked()
             connect(d, &NetUtil::finished, [=](QString s){
                 // 云端歌单列表保存为配置文件
                 QJsonArray array = QstringToJson(getXml(s, "PLAYLIST"));
-
-                qDebug()<<"XML"<<getXml(s, "PLAYLIST");
-                qDebug()<<"PLAYLIST"<<s<<"JSON"<<JsonToQstring(array);
-
                 foreach(QJsonValue val, array)
                     PLAYLIST.append(PlayList::fromJson(val.toObject()));
-
-                qDebug()<<"size"<<PLAYLIST.size();
-
                 savePlayList("playlist/list", PLAYLIST);
                 setPlaylistTab(PLAYLIST, ui->tabWidget);
                 setPLAYLISTTable(PLAYLIST, ui->MusiclistWidget);
