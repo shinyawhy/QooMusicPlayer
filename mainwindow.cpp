@@ -2579,7 +2579,7 @@ void MainWindow::on_LogoutButton_clicked()
 {
     setPlayListTable(localSongs, ui->localMusicTable);
     ui->stackedWidget->setCurrentWidget(ui->localMusicpage);
-    on_SyncButton_clicked();
+//    on_SyncButton_clicked();
     bool loginState = false;
     QString password = "";
     QString username = "";
